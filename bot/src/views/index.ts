@@ -1,1 +1,1 @@
-export { newSlackus } from "./newSlackus";
+export { newBot as newApp } from "./newBot";

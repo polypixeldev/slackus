@@ -1,7 +1,7 @@
-export default function newSlackus(userId: string) {
+export default function newApp(userId: string) {
   return {
     type: "modal" as const,
-    callback_id: "newSlackus",
+    callback_id: "newBot",
     title: {
       type: "plain_text" as const,
       text: "New Slackus Bot",

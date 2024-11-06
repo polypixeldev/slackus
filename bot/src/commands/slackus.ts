@@ -1,6 +1,6 @@
 import Slack from "@slack/bolt";
 
-import newSlackus from "../blocks/newSlackus";
+import newApp from "../blocks/newBot";
 
 export async function slackus(app: Slack.App) {
   app.command("/slackus", async ({ ack, client, body }) => {
@@ -8,7 +8,7 @@ export async function slackus(app: Slack.App) {
 
     await client.views.open({
       trigger_id: body.trigger_id,
-      view: newSlackus(body.user_id),
+      view: newApp(body.user_id),
     });
   });
 }
