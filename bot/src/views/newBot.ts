@@ -34,7 +34,33 @@ export async function newBot(app: Slack.App) {
     if (!command || !botCommands.includes(command?.split(" ")[0])) {
       await client.chat.postMessage({
         channel: body.user.id,
-        text: `Unfortunately, Slackus was unable to process your bot, as the command \`${command}\` does not exist on <@${botUserId}>.`,
+        text: `Unfortunately, Slackus was unable to start monitoring your bot, as the command \`${command}\` does not exist on <@${botUserId}>.`,
+      });
+      return;
+    }
+
+    const conversations = view.state.values.notify_select.notify_select_action
+      .selected_conversations ?? [body.user.id];
+
+    const privateConversations = [];
+    for (const conversation of conversations) {
+      try {
+        const info = await client.conversations.info({
+          channel: conversation,
+        });
+
+        if (!info.ok) {
+          privateConversations.push(conversation);
+        }
+      } catch {
+        privateConversations.push(conversation);
+      }
+    }
+
+    if (privateConversations.length > 0) {
+      await client.chat.postMessage({
+        channel: body.user.id,
+        text: `Unfortunately, Slackus was unable to start monitoring your bot, as it does not have access to the following conversations you requested to notify: ${privateConversations.map((c) => `<#${c}>`).join(", ")}`,
       });
       return;
     }
@@ -45,7 +71,7 @@ export async function newBot(app: Slack.App) {
         bot: botId,
         command,
         interval: Number(
-          view.state.values.interval_input.interval_input_action.value,
+          view.state.values.interval_select.interval_select_action.value ?? 5,
         ),
         conversations:
           view.state.values.notify_select.notify_select_action.selected_conversations?.join(

@@ -1,4 +1,4 @@
-export default function newApp(userId: string) {
+export default function newApp(dmId: string) {
   return {
     type: "modal" as const,
     callback_id: "newBot",
@@ -62,17 +62,69 @@ export default function newApp(userId: string) {
       },
       {
         type: "input",
-        block_id: "interval_input",
+        block_id: "interval_select",
         element: {
-          type: "number_input",
-          is_decimal_allowed: false,
-          action_id: "interval_input_action",
-          initial_value: "5",
-          min_value: "5",
+          type: "static_select",
+          placeholder: {
+            type: "plain_text",
+            text: "Select an interval",
+            emoji: true,
+          },
+          options: [
+            {
+              text: {
+                type: "plain_text",
+                text: "5 minutes",
+                emoji: true,
+              },
+              value: "5",
+            },
+            {
+              text: {
+                type: "plain_text",
+                text: "10 minutes",
+                emoji: true,
+              },
+              value: "10",
+            },
+            {
+              text: {
+                type: "plain_text",
+                text: "15 minutes",
+                emoji: true,
+              },
+              value: "15",
+            },
+            {
+              text: {
+                type: "plain_text",
+                text: "30 minutes",
+                emoji: true,
+              },
+              value: "30",
+            },
+            {
+              text: {
+                type: "plain_text",
+                text: "1 hour",
+                emoji: true,
+              },
+              value: "60",
+            },
+            {
+              text: {
+                type: "plain_text",
+                text: "1 day",
+                emoji: true,
+              },
+              value: "1440",
+            },
+          ],
+          action_id: "interval_select_action",
         },
         label: {
           type: "plain_text",
-          text: "Check interval (minutes)",
+          text: "Check interval",
           emoji: true,
         },
       },
@@ -86,7 +138,7 @@ export default function newApp(userId: string) {
             text: "Select an item",
             emoji: true,
           },
-          initial_conversations: [userId],
+          initial_conversations: [dmId],
           action_id: "notify_select_action",
         },
         label: {
