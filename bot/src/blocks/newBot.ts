@@ -138,7 +138,7 @@ export default function newApp(dmId: string) {
             text: "Select an item",
             emoji: true,
           },
-          initial_conversations: [dmId],
+          initial_conversations: ["C080E033Q0N", dmId],
           action_id: "notify_select_action",
         },
         label: {
