@@ -40,19 +40,20 @@ async function runChecks() {
       checks: true,
     },
   });
-  console.log(`Running ${apps.length} check(s)...`);
 
-  const staleApps: typeof apps = [];
+  const appsToCheck: typeof apps = [];
   for (const app of apps) {
     if (
       new Date().valueOf() - app.interval * 60 * 1000 >=
       (app.checks.at(-1)?.timestamp?.valueOf() ?? 0)
     ) {
-      staleApps.push(app);
+      appsToCheck.push(app);
     }
   }
 
-  for (const app of staleApps) {
+  console.log(`Running ${appsToCheck.length} check(s)...`);
+
+  for (const app of appsToCheck) {
     let runnerLocked = false;
     do {
       console.log("Checking for runner lock...");

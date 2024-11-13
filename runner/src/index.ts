@@ -122,7 +122,7 @@ const app = Express();
 
     const command = req.query.command!.toString();
     await runnerPage.type(`.ql-editor`, command.split(" ")[0]);
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     const commandChoices = await runnerPage.$$eval(
       ".tab_complete_ui_item",
