@@ -1,14 +1,13 @@
 import "dotenv/config";
-import { App as SlackApp } from "@slack/bolt";
+import Slack from "@slack/bolt";
 
-import { prisma } from "./util/prisma";
+import { prisma } from "./util/prisma.js";
 
-import * as views from "./views/index";
-import * as commands from "./commands/index";
+import * as views from "./views/index.js";
+import * as commands from "./commands/index.js";
+import * as events from "./events/index.js";
 
-import type { App } from "@prisma/client";
-
-const app = new SlackApp({
+const slackApp = new Slack.App({
   token: process.env.SLACK_BOT_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   // Comment in prod
@@ -16,75 +15,82 @@ const app = new SlackApp({
   socketMode: true,
 });
 
-app.command("/slackus", async ({ ack }) => {
+slackApp.command("/slackus", async ({ ack }) => {
   await ack();
 });
 
 for (const [name, view] of Object.entries(views)) {
-  view(app);
+  view(slackApp);
   console.log(`Registered view: ${name}`);
 }
 
-for (const [name, view] of Object.entries(commands)) {
-  view(app);
+for (const [name, command] of Object.entries(commands)) {
+  command(slackApp);
   console.log(`Registered command: ${name}`);
 }
 
-async function runChecks() {
-  const checks = await prisma.app.findMany({});
-  console.log(`Running ${checks.length} check(s)...`);
+for (const [name, event] of Object.entries(events)) {
+  event(slackApp);
+  console.log(`Registered event: ${name}`);
+}
 
-  const staleChecks: App[] = [];
-  for (const check of checks) {
+async function runChecks() {
+  const apps = await prisma.app.findMany({
+    include: {
+      checks: true,
+    },
+  });
+  console.log(`Running ${apps.length} check(s)...`);
+
+  const staleApps: typeof apps = [];
+  for (const app of apps) {
     if (
-      new Date().valueOf() - check.interval * 60 * 1000 >=
-      (check.lastCheck?.valueOf() ?? 0)
+      new Date().valueOf() - app.interval * 60 * 1000 >=
+      (app.checks.at(-1)?.timestamp?.valueOf() ?? 0)
     ) {
-      staleChecks.push(check);
+      staleApps.push(app);
     }
   }
 
-  for (const check of staleChecks) {
-    const botRes = await app.client.bots.info({
-      bot: check.bot,
+  for (const app of staleApps) {
+    const botRes = await slackApp.client.bots.info({
+      bot: app.bot,
     });
     const icon = botRes!
       .bot!.icons!.image_48!.toString()
       .replace("_48.png", "_32.png");
 
     const failed = await fetch(
-      `${process.env.RUNNER_URL}/check?command=${encodeURIComponent(check.command)}&pfp=${encodeURIComponent(icon)}`,
+      `${process.env.RUNNER_URL}/check?command=${encodeURIComponent(app.command)}&pfp=${encodeURIComponent(icon)}`,
     ).then((r) => r.json());
 
-    if (check.currentStatus === "up" && failed) {
-      const conversations = check.conversations.split(",");
+    if (app.checks.at(-1)?.status === "up" && failed) {
+      const conversations = app.conversations.split(",");
 
       for (const conversation of conversations) {
-        await app.client.chat.postMessage({
+        await slackApp.client.chat.postMessage({
           channel: conversation,
           text: `Bot <@${botRes.bot?.user_id}> is down!`,
         });
       }
     }
 
-    if (check.currentStatus === "down" && !failed) {
-      const conversations = check.conversations.split(",");
+    if (app.checks.at(-1)?.status === "down" && !failed) {
+      const conversations = app.conversations.split(",");
 
       for (const conversation of conversations) {
-        await app.client.chat.postMessage({
+        await slackApp.client.chat.postMessage({
           channel: conversation,
           text: `Bot <@${botRes.bot?.user_id}> is back up!`,
         });
       }
     }
 
-    await prisma.app.update({
-      where: {
-        id: check.id,
-      },
+    await prisma.check.create({
       data: {
-        lastCheck: new Date(),
-        currentStatus: failed ? "down" : "up",
+        timestamp: new Date(),
+        appId: app.id,
+        status: failed ? "down" : "up",
       },
     });
   }
@@ -96,7 +102,7 @@ runChecks();
 
 (async () => {
   // Comment in prod
-  await app.start();
+  await slackApp.start();
   // await app.start(process.env.PORT ?? 3000);
   console.log("Slackus is up!");
 })();

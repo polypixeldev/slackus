@@ -1,6 +1,6 @@
 import Slack from "@slack/bolt";
 
-import { prisma } from "../util/prisma";
+import { prisma } from "../util/prisma.js";
 
 export async function newBot(app: Slack.App) {
   app.view("newBot", async ({ ack, view, client, body, respond }) => {

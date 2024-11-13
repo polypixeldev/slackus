@@ -1,1 +1,1 @@
-export { slackus } from "./slackus";
+export { slackus } from "./slackus.js";

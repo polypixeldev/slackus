@@ -1,6 +1,6 @@
 import Slack from "@slack/bolt";
 
-import newApp from "../blocks/newBot";
+import newApp from "../blocks/newBot.js";
 
 export async function slackus(app: Slack.App) {
   app.command("/slackus", async ({ ack, client, body }) => {

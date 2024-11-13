@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "tsc && node dist/index.js"
   },
@@ -11,7 +12,8 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.20.0",
-    "@slack/bolt": "^3.22.0"
+    "@slack/bolt": "^3.22.0",
+    "pretty-ms": "^9.1.0"
   },
   "devDependencies": {
     "dotenv": "^16.4.5",
