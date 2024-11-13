@@ -120,7 +120,10 @@ const app = Express();
     const commandChoices = await runnerPage.$$eval(
       ".tab_complete_ui_item",
       (commandElements) => {
-        const results = [];
+        const results: {
+          src: string;
+          id: string;
+        }[] = [];
         for (const commandElement of commandElements) {
           const imgElement = commandElement.querySelector(
             ".c-base_icon--image",
