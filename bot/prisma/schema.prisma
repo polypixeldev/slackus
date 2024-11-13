@@ -8,11 +8,12 @@ datasource db {
 }
 
 model App {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   user          String
   bot           String
   command       String
   interval      Int
   conversations String
   lastCheck     DateTime?
+  currentStatus String    @default("up")
 }

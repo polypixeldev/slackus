@@ -56,25 +56,37 @@ async function runChecks() {
       `${process.env.RUNNER_URL}/check?command=${encodeURIComponent(check.command)}&pfp=${encodeURIComponent(icon)}`,
     ).then((r) => r.json());
 
-    if (failed) {
+    if (check.currentStatus === "up" && failed) {
       const conversations = check.conversations.split(",");
 
       for (const conversation of conversations) {
         await app.client.chat.postMessage({
           channel: conversation,
-          text: `Check for bot <@${botRes.bot?.user_id}> failed!`,
+          text: `Bot <@${botRes.bot?.user_id}> is down!`,
         });
       }
     }
 
-    // await prisma.app.update({
-    //   where: {
-    //     id: check.id,
-    //   },
-    //   data: {
-    //     lastCheck: new Date(),
-    //   },
-    // });
+    if (check.currentStatus === "down" && !failed) {
+      const conversations = check.conversations.split(",");
+
+      for (const conversation of conversations) {
+        await app.client.chat.postMessage({
+          channel: conversation,
+          text: `Bot <@${botRes.bot?.user_id}> is back up!`,
+        });
+      }
+    }
+
+    await prisma.app.update({
+      where: {
+        id: check.id,
+      },
+      data: {
+        lastCheck: new Date(),
+        currentStatus: failed ? "down" : "up",
+      },
+    });
   }
 }
 
