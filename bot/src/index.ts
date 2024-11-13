@@ -53,6 +53,19 @@ async function runChecks() {
   }
 
   for (const app of staleApps) {
+    let runnerLocked = false;
+    do {
+      console.log("Checking for runner lock...");
+      runnerLocked = await fetch(`${process.env.RUNNER_URL}/locked`).then((r) =>
+        r.json(),
+      );
+
+      if (runnerLocked) {
+        await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
+      }
+    } while (runnerLocked);
+
+    console.log(`Runner unlocked, checking app ${app.id}`);
     const botRes = await slackApp.client.bots.info({
       bot: app.bot,
     });

@@ -104,7 +104,14 @@ const app = Express();
     await runnerPage.close();
   });
 
+  let locked = false;
+
+  app.get("/locked", async (req, res) => {
+    await res.json(locked);
+  });
+
   app.get("/check", async (req, res) => {
+    locked = true;
     const runnerPage = await browser.newPage();
     await runnerPage.setCookie(...cookies);
     await runnerPage.goto(
@@ -216,6 +223,15 @@ const app = Express();
 
     res.json(failed);
     await runnerPage.close();
+    locked = false;
+  });
+
+  // @ts-expect-error
+  app.use((err, req, res, next) => {
+    if (req.path === "/check" && err) {
+      locked = false;
+    }
+    next(err);
   });
 
   app.listen(process.env.PORT ?? 3000);
