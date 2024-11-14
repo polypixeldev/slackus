@@ -1,9 +1,13 @@
 import Slack from "@slack/bolt";
 
 import { prisma } from "../util/prisma.js";
+import newCommandMethod from "../blocks/newCommandMethod.js";
+import newHttpMethod from "../blocks/newHttpMethod.js";
 
-export async function newBot(app: Slack.App) {
-  app.view("newBot", async ({ ack, view, client, body, respond }) => {
+import type { MethodType } from "@prisma/client";
+
+export async function newApp(slackApp: Slack.App) {
+  slackApp.view("newApp", async ({ ack, view, client, body, payload }) => {
     const botUserId =
       view.state.values.bot_select.bot_select_action.selected_user;
     const botUserRes = await client.users.info({
@@ -19,25 +23,7 @@ export async function newBot(app: Slack.App) {
       });
     }
 
-    await ack();
-
     const botId = botUserRes.user?.profile?.bot_id!;
-    const appRes = await client.bots.info({
-      bot: botId,
-    });
-    const appId = appRes.bot?.app_id;
-    const botCommands = await fetch(
-      `${process.env.RUNNER_URL}/commands?appId=${appId}`,
-    ).then((r) => r.json());
-
-    const command = view.state.values.command_input.command_input_action.value;
-    if (!command || !botCommands.includes(command?.split(" ")[0])) {
-      await client.chat.postMessage({
-        channel: body.user.id,
-        text: `Unfortunately, Slackus was unable to start monitoring your bot, as the command \`${command}\` does not exist on <@${botUserId}>.`,
-      });
-      return;
-    }
 
     const conversations = view.state.values.notify_select.notify_select_action
       .selected_conversations ?? [body.user.id];
@@ -60,7 +46,7 @@ export async function newBot(app: Slack.App) {
     if (privateConversations.length > 0) {
       await client.chat.postMessage({
         channel: body.user.id,
-        text: `Unfortunately, Slackus was unable to start monitoring your bot, as it does not have access to the following conversations you requested to notify: ${privateConversations.map((c) => `<#${c}>`).join(", ")}`,
+        text: `Unfortunately, Slackus was unable to create your app, as it does not have access to the following conversations you requested to notify: ${privateConversations.map((c) => `<#${c}>`).join(", ")}`,
       });
       return;
     }
@@ -79,23 +65,34 @@ export async function newBot(app: Slack.App) {
       },
     });
 
-    const method = await prisma.method.create({
+    const methodType = view.state.values.method_select.method_select_action
+      .selected_option?.value as MethodType;
+
+    await prisma.method.create({
       data: {
-        type: "Command",
+        type: methodType,
         appId: app.id,
       },
     });
 
-    await prisma.commandMethod.create({
-      data: {
-        command,
-        methodId: method.id,
-      },
-    });
+    switch (methodType) {
+      case "Command": {
+        await ack({
+          response_action: "push",
+          view: newCommandMethod(app.id),
+        });
 
-    await client.chat.postMessage({
-      channel: body.user.id,
-      text: `Slackus bot <@${botUserId}> has been created!`,
-    });
+        break;
+      }
+
+      case "HTTP": {
+        await ack({
+          response_action: "push",
+          view: newHttpMethod(app.id),
+        });
+
+        break;
+      }
+    }
   });
 }

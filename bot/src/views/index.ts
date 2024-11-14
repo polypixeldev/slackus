@@ -1,1 +1,2 @@
-export { newBot as newApp } from "./newBot.js";
+export { newApp } from "./newApp.js";
+export { newCommandMethod } from "./newCommandMethod.js";

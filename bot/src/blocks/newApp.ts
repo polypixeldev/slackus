@@ -1,10 +1,10 @@
 export default function newApp(dmId: string) {
   return {
     type: "modal" as const,
-    callback_id: "newBot",
+    callback_id: "newApp",
     title: {
       type: "plain_text" as const,
-      text: "New Slackus Bot",
+      text: "New Slackus App",
       emoji: true,
     },
     submit: {
@@ -22,7 +22,7 @@ export default function newApp(dmId: string) {
         type: "section",
         text: {
           type: "mrkdwn",
-          text: "Enter in the details of your bot below to add it to Slackus.",
+          text: "Enter in the details of your app below to add it to Slackus.",
         },
       },
       {
@@ -45,18 +45,37 @@ export default function newApp(dmId: string) {
       },
       {
         type: "input",
-        block_id: "command_input",
+        block_id: "method_select",
         element: {
-          type: "plain_text_input",
-          action_id: "command_input_action",
+          type: "static_select",
           placeholder: {
             type: "plain_text",
-            text: "Starts with /",
+            text: "Select a status checking method",
+            emoji: true,
           },
+          options: [
+            {
+              text: {
+                type: "plain_text",
+                text: "Slash Command",
+                emoji: true,
+              },
+              value: "Command",
+            },
+            {
+              text: {
+                type: "plain_text",
+                text: "HTTP(S) Request",
+                emoji: true,
+              },
+              value: "HTTP",
+            },
+          ],
+          action_id: "method_select_action",
         },
         label: {
           type: "plain_text",
-          text: "Command to run",
+          text: "Status check method",
           emoji: true,
         },
       },
