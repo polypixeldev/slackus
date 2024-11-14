@@ -48,6 +48,7 @@ export async function newApp(slackApp: Slack.App) {
         channel: body.user.id,
         text: `Unfortunately, Slackus was unable to create your app, as it does not have access to the following conversations you requested to notify: ${privateConversations.map((c) => `<#${c}>`).join(", ")}`,
       });
+      await ack();
       return;
     }
 
