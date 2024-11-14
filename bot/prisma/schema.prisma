@@ -3,18 +3,53 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model App {
-  id            String  @id @default(cuid())
-  user          String
-  bot           String
-  command       String
+  id   String @id @default(cuid())
+  user String
+  bot  String
+
+  method Method?
+
   interval      Int
   conversations String
   checks        Check[]
+}
+
+model Method {
+  id   String     @id @default(cuid())
+  type MethodType
+
+  command CommandMethod?
+  http    HttpMethod?
+
+  appId String @unique
+  app   App    @relation(fields: [appId], references: [id])
+}
+
+model CommandMethod {
+  id      String @id @default(cuid())
+  command String
+
+  methodId String @unique
+  method   Method @relation(fields: [methodId], references: [id])
+}
+
+model HttpMethod {
+  id         String @id @default(cuid())
+  url        String
+  httpMethod String
+
+  methodId String @unique
+  method   Method @relation(fields: [methodId], references: [id])
+}
+
+enum MethodType {
+  Command
+  HTTP
 }
 
 model Check {

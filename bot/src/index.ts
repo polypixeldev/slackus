@@ -38,6 +38,7 @@ async function runChecks() {
   const apps = await prisma.app.findMany({
     include: {
       checks: true,
+      method: true,
     },
   });
 
@@ -67,16 +68,69 @@ async function runChecks() {
     } while (runnerLocked);
 
     console.log(`Runner unlocked, checking app ${app.id}`);
+
+    if (!app.method) {
+      console.error(`No method found for app ${app.id}`);
+      continue;
+    }
+
     const botRes = await slackApp.client.bots.info({
       bot: app.bot,
     });
-    const icon = botRes!
-      .bot!.icons!.image_48!.toString()
-      .replace("_48.png", "_32.png");
 
-    const failed = await fetch(
-      `${process.env.RUNNER_URL}/check?command=${encodeURIComponent(app.command)}&pfp=${encodeURIComponent(icon)}`,
-    ).then((r) => r.json());
+    let failed = true;
+    switch (app.method.type) {
+      case "Command": {
+        const commandMethod = await prisma.commandMethod.findUnique({
+          where: {
+            methodId: app.method.id,
+          },
+        });
+
+        if (!commandMethod) {
+          console.error(`No command method found for app ${app.id}`);
+          continue;
+        }
+
+        const icon = botRes!
+          .bot!.icons!.image_48!.toString()
+          .replace("_48.png", "_32.png");
+
+        failed = await fetch(
+          `${process.env.RUNNER_URL}/check?command=${encodeURIComponent(commandMethod.command)}&pfp=${encodeURIComponent(icon)}`,
+        ).then((r) => r.json());
+
+        break;
+      }
+
+      case "HTTP": {
+        const httpMethod = await prisma.httpMethod.findUnique({
+          where: {
+            methodId: app.method.id,
+          },
+        });
+
+        if (!httpMethod) {
+          console.error(`No HTTP method found for app ${app.id}`);
+          continue;
+        }
+
+        try {
+          const res = await fetch(httpMethod.url, {
+            method: httpMethod.httpMethod,
+          });
+
+          // 2xx status codes == success
+          if (res.status >= 200 && res.status < 300) {
+            failed = false;
+          } else {
+            failed = true;
+          }
+        } catch (e) {
+          failed = true;
+        }
+      }
+    }
 
     if (app.checks.at(-1)?.status === "up" && failed) {
       const conversations = app.conversations.split(",");

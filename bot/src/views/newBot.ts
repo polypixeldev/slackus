@@ -65,11 +65,10 @@ export async function newBot(app: Slack.App) {
       return;
     }
 
-    await prisma.app.create({
+    const app = await prisma.app.create({
       data: {
         user: body.user.id,
         bot: botId,
-        command,
         interval: Number(
           view.state.values.interval_select.interval_select_action.value ?? 5,
         ),
@@ -77,6 +76,20 @@ export async function newBot(app: Slack.App) {
           view.state.values.notify_select.notify_select_action.selected_conversations?.join(
             ",",
           ) ?? body.user.id,
+      },
+    });
+
+    const method = await prisma.method.create({
+      data: {
+        type: "Command",
+        appId: app.id,
+      },
+    });
+
+    await prisma.commandMethod.create({
+      data: {
+        command,
+        methodId: method.id,
       },
     });
 
