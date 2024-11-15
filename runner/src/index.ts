@@ -110,7 +110,8 @@ const app = Express();
     res.json(locked);
   });
 
-  app.get("/check", async (req, res) => {
+  app.get("/check", async (req, res, next) => {
+    console.log("Checking app");
     locked = true;
     const runnerPage = await browser.newPage();
     await runnerPage.setCookie(...cookies);
@@ -154,6 +155,7 @@ const app = Express();
 
       res.json(true);
       await runnerPage.close();
+      next();
       return;
     }
 
@@ -171,6 +173,7 @@ const app = Express();
 
       res.json(true);
       await runnerPage.close();
+      next();
       return;
     }
 
@@ -223,12 +226,20 @@ const app = Express();
 
     res.json(failed);
     await runnerPage.close();
-    locked = false;
+    next();
   });
 
+  app.use((req, res, next) => {
+    console.log("Unlocking runner");
+    if (req.path === "/check") {
+      locked = false;
+    }
+    next();
+  });
   // @ts-expect-error
   app.use((err, req, res, next) => {
-    if (req.path === "/check" && err) {
+    console.error(err);
+    if (req.path === "/check") {
       locked = false;
     }
     next(err);

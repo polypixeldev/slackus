@@ -90,6 +90,7 @@ async function runChecks() {
           (r) => r.json(),
         );
       } catch {
+        console.error("Runner lock check errored, assuming locked...");
         runnerLocked = true;
       }
 
