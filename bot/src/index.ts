@@ -7,16 +7,13 @@ import * as views from "./views/index.js";
 import * as commands from "./commands/index.js";
 import * as events from "./events/index.js";
 
-const slackApp = new Slack.App({
-  token: process.env.SLACK_BOT_TOKEN,
-  signingSecret: process.env.SLACK_SIGNING_SECRET,
-  // Comment in prod
-  appToken: process.env.SLACK_APP_TOKEN,
-  socketMode: true,
+const receiver = new Slack.ExpressReceiver({
+  signingSecret: process.env.SLACK_SIGNING_SECRET!,
 });
 
-slackApp.command("/slackus", async ({ ack }) => {
-  await ack();
+const slackApp = new Slack.App({
+  token: process.env.SLACK_BOT_TOKEN,
+  receiver,
 });
 
 for (const [name, view] of Object.entries(views)) {
@@ -33,6 +30,36 @@ for (const [name, event] of Object.entries(events)) {
   event(slackApp);
   console.log(`Registered event: ${name}`);
 }
+
+receiver.router.get("/heartbeat", async (req, res) => {
+  const appId = req.query.app?.toString();
+
+  if (!appId) {
+    res.sendStatus(400);
+    return;
+  }
+
+  const app = await prisma.app.findUnique({
+    where: {
+      id: appId,
+    },
+  });
+
+  if (!app) {
+    res.sendStatus(400);
+    return;
+  }
+
+  await prisma.check.create({
+    data: {
+      appId,
+      status: "up",
+      timestamp: new Date(),
+    },
+  });
+
+  res.sendStatus(200);
+});
 
 async function runChecks() {
   const apps = await prisma.app.findMany({
@@ -129,6 +156,11 @@ async function runChecks() {
         } catch (e) {
           failed = true;
         }
+      }
+
+      case "Heartbeat": {
+        // If it's been <interval> since the last check, then there's been no heartbeats
+        failed = true;
       }
     }
 

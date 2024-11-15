@@ -27,7 +27,7 @@ export default function newHeartbeatMethod(appId: string, interval: number) {
             Here are your details for the heartbeats:
             - Send a HTTPS GET request to \`${process.env.HOST_URL}/heartbeat?app=${appId}\` at least every ${interval} minutes
             - Slackus will respond with 200 OK
-            - If your app fails to send a heartbeat within the interval, Slackus will mark your app as down and notify you
+            - If your app fails to send a heartbeat within the interval (and an indeterminate grace period), Slackus will mark your app as down and notify you
           `,
         },
       },
