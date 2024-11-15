@@ -107,7 +107,7 @@ const app = Express();
   let locked = false;
 
   app.get("/locked", async (req, res) => {
-    await res.json(locked);
+    res.json(locked);
   });
 
   app.get("/check", async (req, res) => {

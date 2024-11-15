@@ -132,7 +132,9 @@ async function runChecks() {
       }
     }
 
-    if (app.checks.at(-1)?.status === "up" && failed) {
+    const firstCheck = app.checks.length === 0;
+
+    if ((app.checks.at(-1)?.status === "up" || firstCheck) && failed) {
       const conversations = app.conversations.split(",");
 
       for (const conversation of conversations) {
@@ -143,13 +145,13 @@ async function runChecks() {
       }
     }
 
-    if (app.checks.at(-1)?.status === "down" && !failed) {
+    if ((app.checks.at(-1)?.status === "down" || firstCheck) && !failed) {
       const conversations = app.conversations.split(",");
 
       for (const conversation of conversations) {
         await slackApp.client.chat.postMessage({
           channel: conversation,
-          text: `Bot <@${botRes.bot?.user_id}> is back up!`,
+          text: `Bot <@${botRes.bot?.user_id}> is up!`,
         });
       }
     }

@@ -59,7 +59,7 @@ export async function newCommandMethod(slackApp: Slack.App) {
 
       await client.chat.postMessage({
         channel: body.user.id,
-        text: `Slackus bot <@${botRes.bot?.user_id}> has been created!`,
+        text: `Slackus app <@${botRes.bot?.user_id}> has been created!`,
       });
     },
   );
