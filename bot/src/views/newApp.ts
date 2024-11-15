@@ -25,6 +25,23 @@ export async function newApp(slackApp: Slack.App) {
 
     const botId = botUserRes.user?.profile?.bot_id!;
 
+    const botExists =
+      (await prisma.app.findFirst({
+        where: {
+          bot: botId,
+        },
+      })) !== null;
+
+    if (botExists) {
+      await ack({
+        response_action: "errors",
+        errors: {
+          bot_select: "There is already a Slackus app with this bot",
+        },
+      });
+      return;
+    }
+
     const conversations = view.state.values.notify_select.notify_select_action
       .selected_conversations ?? [body.user.id];
 
@@ -44,11 +61,13 @@ export async function newApp(slackApp: Slack.App) {
     }
 
     if (privateConversations.length > 0) {
-      await client.chat.postMessage({
-        channel: body.user.id,
-        text: `Unfortunately, Slackus was unable to create your app, as it does not have access to the following conversations you requested to notify: ${privateConversations.map((c) => `<#${c}>`).join(", ")}`,
+      await ack({
+        response_action: "errors",
+        errors: {
+          notify_select:
+            "Slackus does not have access to one or more of these conversations",
+        },
       });
-      await ack();
       return;
     }
 
