@@ -85,9 +85,13 @@ async function runChecks() {
     let runnerLocked = false;
     do {
       console.log("Checking for runner lock...");
-      runnerLocked = await fetch(`${process.env.RUNNER_URL}/locked`).then((r) =>
-        r.json(),
-      );
+      try {
+        runnerLocked = await fetch(`${process.env.RUNNER_URL}/locked`).then(
+          (r) => r.json(),
+        );
+      } catch {
+        runnerLocked = true;
+      }
 
       if (runnerLocked) {
         await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
