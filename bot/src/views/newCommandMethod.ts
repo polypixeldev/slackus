@@ -6,6 +6,15 @@ export async function newCommandMethod(slackApp: Slack.App) {
   slackApp.view(
     "newCommandMethod",
     async ({ ack, view, client, body, respond }) => {
+      if (body.type === "view_closed") {
+        await ack();
+        await prisma.app.delete({
+          where: {
+            id: view.private_metadata,
+          },
+        });
+      }
+
       await ack({
         response_action: "clear",
       });

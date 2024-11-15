@@ -7,6 +7,15 @@ export async function newHttpMethod(slackApp: Slack.App) {
   slackApp.view(
     "newHttpMethod",
     async ({ ack, view, client, body, respond }) => {
+      if (body.type === "view_closed") {
+        await ack();
+        await prisma.app.delete({
+          where: {
+            id: view.private_metadata,
+          },
+        });
+      }
+
       const app = await prisma.app.findUnique({
         where: {
           id: view.private_metadata,

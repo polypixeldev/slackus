@@ -3,6 +3,7 @@ export default function newHttpMethod(appId: string) {
     type: "modal" as const,
     callback_id: "newHttpMethod",
     private_metadata: appId,
+    notify_on_close: true,
     title: {
       type: "plain_text" as const,
       text: "New Slackus App",
