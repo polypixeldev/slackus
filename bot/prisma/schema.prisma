@@ -23,8 +23,8 @@ model Method {
   id   String     @id @default(cuid())
   type MethodType
 
-  command CommandMethod?
-  http    HttpMethod?
+  command   CommandMethod?
+  http      HttpMethod?
 
   appId String @unique
   app   App    @relation(fields: [appId], references: [id])
@@ -50,6 +50,7 @@ model HttpMethod {
 enum MethodType {
   Command
   HTTP
+  Heartbeat
 }
 
 model Check {

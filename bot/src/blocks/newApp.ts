@@ -70,6 +70,14 @@ export default function newApp(dmId: string) {
               },
               value: "HTTP",
             },
+            {
+              text: {
+                type: "plain_text",
+                text: "Heartbeats",
+                emoji: true,
+              },
+              value: "Heartbeat",
+            },
           ],
           action_id: "method_select_action",
         },

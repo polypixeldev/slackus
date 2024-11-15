@@ -3,6 +3,7 @@ import Slack from "@slack/bolt";
 import { prisma } from "../util/prisma.js";
 import newCommandMethod from "../blocks/newCommandMethod.js";
 import newHttpMethod from "../blocks/newHttpMethod.js";
+import newHeartbeatMethod from "../blocks/newHeartbeatMethod.js";
 
 import type { MethodType } from "@prisma/client";
 
@@ -109,6 +110,15 @@ export async function newApp(slackApp: Slack.App) {
         await ack({
           response_action: "push",
           view: newHttpMethod(app.id),
+        });
+
+        break;
+      }
+
+      case "Heartbeat": {
+        await ack({
+          response_action: "push",
+          view: newHeartbeatMethod(app.id, app.interval),
         });
 
         break;
