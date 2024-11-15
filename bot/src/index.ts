@@ -203,8 +203,6 @@ setInterval(runChecks, 5 * 60 * 1000);
 runChecks();
 
 (async () => {
-  // Comment in prod
-  await slackApp.start();
-  // await app.start(process.env.PORT ?? 3000);
+  await slackApp.start(process.env.PORT ?? 4000);
   console.log("Slackus is up!");
 })();
