@@ -27,7 +27,7 @@ model Method {
   http      HttpMethod?
 
   appId String @unique
-  app   App    @relation(fields: [appId], references: [id])
+  app   App    @relation(fields: [appId], references: [id], onDelete: Cascade)
 }
 
 model CommandMethod {
@@ -35,7 +35,7 @@ model CommandMethod {
   command String
 
   methodId String @unique
-  method   Method @relation(fields: [methodId], references: [id])
+  method   Method @relation(fields: [methodId], references: [id], onDelete: Cascade)
 }
 
 model HttpMethod {
@@ -44,7 +44,7 @@ model HttpMethod {
   httpMethod String
 
   methodId String @unique
-  method   Method @relation(fields: [methodId], references: [id])
+  method   Method @relation(fields: [methodId], references: [id], onDelete: Cascade)
 }
 
 enum MethodType {
@@ -55,7 +55,7 @@ enum MethodType {
 
 model Check {
   id        String   @id @default(cuid())
-  app       App      @relation(fields: [appId], references: [id])
+  app       App      @relation(fields: [appId], references: [id], onDelete: Cascade)
   appId     String
   status    String   @default("up")
   timestamp DateTime
