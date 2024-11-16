@@ -123,29 +123,11 @@ const app = Express();
 
     const command = req.query.command!.toString();
     await runnerPage.type(`.ql-editor`, command.split(" ")[0]);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     const commandChoices = await runnerPage.$$eval(
       ".tab_complete_ui_item",
-      (commandElements) => {
-        const results: {
-          src: string;
-          id: string;
-        }[] = [];
-        for (const commandElement of commandElements) {
-          const imgElement = commandElement.querySelector(
-            ".c-base_icon--image",
-          ) as HTMLImageElement;
-          if (!imgElement) continue;
-          const src = imgElement.src;
-          results.push({
-            src,
-            id: commandElement.id,
-          });
-        }
-
-        return results;
-      },
+      (commandElements) => commandElements.map((e) => e.id),
     );
 
     if (!commandChoices) {
@@ -159,25 +141,7 @@ const app = Express();
       return;
     }
 
-    let commandId = null;
-    for (const choice of commandChoices) {
-      if (choice.src === req.query.pfp) {
-        commandId = choice.id;
-      }
-    }
-
-    if (!commandId) {
-      for (let i = 0; i < command.split(" ")[0].length; i++) {
-        runnerPage.keyboard.press("Backspace");
-      }
-
-      res.json(true);
-      await runnerPage.close();
-      next();
-      return;
-    }
-
-    await runnerPage.click(`#${commandId}`);
+    await runnerPage.click(`#${commandChoices[0]}`);
     await runnerPage.type(`.ql-editor`, command.split(" ").slice(1).join(" "));
     await runnerPage.keyboard.press("Enter");
 

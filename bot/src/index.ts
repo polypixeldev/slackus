@@ -135,7 +135,7 @@ async function runChecks() {
           .replace("_48.png", "_32.png");
 
         failed = await fetch(
-          `${process.env.RUNNER_URL}/check?command=${encodeURIComponent(commandMethod.command)}&pfp=${encodeURIComponent(icon)}`,
+          `${process.env.RUNNER_URL}/check?command=${encodeURIComponent(commandMethod.command)}`,
         ).then((r) => r.json());
 
         break;
