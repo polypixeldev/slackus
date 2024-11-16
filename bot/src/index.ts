@@ -152,6 +152,8 @@ async function runChecks() {
             method: httpMethod.httpMethod,
           });
 
+          console.log(res.status);
+
           // 2xx status codes == success
           if (res.status >= 200 && res.status < 300) {
             failed = false;
@@ -161,11 +163,15 @@ async function runChecks() {
         } catch (e) {
           failed = true;
         }
+
+        break;
       }
 
       case "Heartbeat": {
         // If it's been <interval> since the last check, then there's been no heartbeats
         failed = true;
+
+        break;
       }
     }
 
