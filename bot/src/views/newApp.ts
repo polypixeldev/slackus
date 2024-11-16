@@ -117,7 +117,7 @@ export async function newApp(slackApp: Slack.App) {
 
       case "Heartbeat": {
         await ack({
-          response_action: "push",
+          response_action: "update",
           view: newHeartbeatMethod(app.id, app.interval),
         });
 

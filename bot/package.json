@@ -13,7 +13,8 @@
   "dependencies": {
     "@prisma/client": "^5.20.0",
     "@slack/bolt": "^3.22.0",
-    "pretty-ms": "^9.1.0"
+    "pretty-ms": "^9.1.0",
+    "strip-indent": "^4.0.0"
   },
   "devDependencies": {
     "dotenv": "^16.4.5",

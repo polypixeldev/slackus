@@ -152,8 +152,6 @@ async function runChecks() {
             method: httpMethod.httpMethod,
           });
 
-          console.log(res.status);
-
           // 2xx status codes == success
           if (res.status >= 200 && res.status < 300) {
             failed = false;
