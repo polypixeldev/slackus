@@ -30,8 +30,7 @@ export default function dashboard(
             emoji: true,
           },
           style: "primary",
-          value: "click_me_123",
-          action_id: "button-action",
+          action_id: "newBot",
         },
       },
       {

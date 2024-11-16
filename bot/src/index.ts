@@ -3,9 +3,10 @@ import Slack from "@slack/bolt";
 
 import { prisma } from "./util/prisma.js";
 
-import * as views from "./views/index.js";
+import * as actions from "./actions/index.js";
 import * as commands from "./commands/index.js";
 import * as events from "./events/index.js";
+import * as views from "./views/index.js";
 
 const receiver = new Slack.ExpressReceiver({
   signingSecret: process.env.SLACK_SIGNING_SECRET!,
@@ -16,9 +17,9 @@ const slackApp = new Slack.App({
   receiver,
 });
 
-for (const [name, view] of Object.entries(views)) {
-  view(slackApp);
-  console.log(`Registered view: ${name}`);
+for (const [name, action] of Object.entries(actions)) {
+  action(slackApp);
+  console.log(`Registered action: ${name}`);
 }
 
 for (const [name, command] of Object.entries(commands)) {
@@ -29,6 +30,11 @@ for (const [name, command] of Object.entries(commands)) {
 for (const [name, event] of Object.entries(events)) {
   event(slackApp);
   console.log(`Registered event: ${name}`);
+}
+
+for (const [name, view] of Object.entries(views)) {
+  view(slackApp);
+  console.log(`Registered view: ${name}`);
 }
 
 receiver.router.get("/heartbeat", async (req, res) => {

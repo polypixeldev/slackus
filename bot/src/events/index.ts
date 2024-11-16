@@ -1,1 +1,1 @@
-export { app_home_opened } from "./app_home_opened.js";
+export { appHomeOpened } from "./appHomeOpened.js";

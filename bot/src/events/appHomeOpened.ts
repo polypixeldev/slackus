@@ -4,7 +4,7 @@ import { prisma } from "../util/prisma.js";
 
 import dashboard from "../blocks/dashboard.js";
 
-export async function app_home_opened(app: Slack.App) {
+export async function appHomeOpened(app: Slack.App) {
   app.event("app_home_opened", async ({ event, client }) => {
     const user = event.user;
 
