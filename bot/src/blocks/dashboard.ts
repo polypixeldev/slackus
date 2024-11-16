@@ -20,17 +20,17 @@ export default function dashboard(
         type: "section",
         text: {
           type: "mrkdwn",
-          text: "Here are all of your Slackus bots!",
+          text: "Here are all of your Slackus apps!",
         },
         accessory: {
           type: "button",
           text: {
             type: "plain_text",
-            text: "Create new bot",
+            text: "Create new app",
             emoji: true,
           },
           style: "primary",
-          action_id: "newBot",
+          action_id: "newApp",
         },
       },
       {

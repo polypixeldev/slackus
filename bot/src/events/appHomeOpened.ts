@@ -8,7 +8,7 @@ export async function appHomeOpened(app: Slack.App) {
   app.event("app_home_opened", async ({ event, client }) => {
     const user = event.user;
 
-    const userBots = await prisma.app.findMany({
+    const userApps = await prisma.app.findMany({
       where: {
         user,
       },
@@ -17,13 +17,13 @@ export async function appHomeOpened(app: Slack.App) {
       },
     });
 
-    const newBots = [];
-    for (const app of userBots) {
+    const newApps = [];
+    for (const app of userApps) {
       const botRes = await client.bots.info({
         bot: app.bot,
       });
 
-      newBots.push({
+      newApps.push({
         ...app,
         botUser: botRes!.bot!.user_id!,
       });
@@ -31,7 +31,7 @@ export async function appHomeOpened(app: Slack.App) {
 
     await client.views.publish({
       user_id: user,
-      view: dashboard(newBots),
+      view: dashboard(newApps),
     });
   });
 }

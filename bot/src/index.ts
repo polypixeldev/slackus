@@ -187,7 +187,7 @@ async function runChecks() {
       for (const conversation of conversations) {
         await slackApp.client.chat.postMessage({
           channel: conversation,
-          text: `Bot <@${botRes.bot?.user_id}> is down!`,
+          text: `App <@${botRes.bot?.user_id}> is down!`,
         });
       }
     }
@@ -198,7 +198,7 @@ async function runChecks() {
       for (const conversation of conversations) {
         await slackApp.client.chat.postMessage({
           channel: conversation,
-          text: `Bot <@${botRes.bot?.user_id}> is up!`,
+          text: `App <@${botRes.bot?.user_id}> is up!`,
         });
       }
     }

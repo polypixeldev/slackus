@@ -1,1 +1,1 @@
-export { newBot } from "./newBot.js";
+export { newApp } from "./newApp.js";
