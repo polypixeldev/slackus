@@ -43,8 +43,23 @@ export default function editApp(
         type: "section",
         text: {
           type: "mrkdwn",
-          text: `Make changes to your Slackus app *${botName}* below.`,
+          text: `Make changes to your Slackus app *${botName}* below, or choose an action:`,
         },
+      },
+      {
+        type: "actions",
+        block_id: "actions",
+        elements: [
+          {
+            type: "button",
+            text: {
+              type: "plain_text",
+              text: "Check now",
+            },
+            action_id: "check",
+            value: app.id,
+          },
+        ],
       },
       {
         type: "input",
