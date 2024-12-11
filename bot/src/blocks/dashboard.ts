@@ -133,8 +133,8 @@ export default function dashboard(
               text: "Edit",
               emoji: true,
             },
-            value: "click_me_123",
-            action_id: "button-action",
+            value: app.id,
+            action_id: "editApp",
           },
         };
       }),

@@ -3,9 +3,9 @@ import URL from "url";
 
 import { prisma } from "../util/prisma.js";
 
-export async function newHttpMethod(slackApp: Slack.App) {
+export async function editHttpMethod(slackApp: Slack.App) {
   slackApp.view(
-    "newHttpMethod",
+    "editHttpMethod",
     async ({ ack, view, client, body, respond }) => {
       if (body.type === "view_closed") {
         await ack();
@@ -77,8 +77,15 @@ export async function newHttpMethod(slackApp: Slack.App) {
         response_action: "clear",
       });
 
-      await prisma.httpMethod.create({
-        data: {
+      await prisma.httpMethod.upsert({
+        where: {
+          methodId: app.method!.id,
+        },
+        update: {
+          url,
+          httpMethod,
+        },
+        create: {
           url,
           httpMethod,
           methodId: app.method!.id,
@@ -87,7 +94,7 @@ export async function newHttpMethod(slackApp: Slack.App) {
 
       await client.chat.postMessage({
         channel: body.user.id,
-        text: `Slackus app <@${botRes.bot?.user_id}> has been created!`,
+        text: `Slackus app <@${botRes.bot?.user_id}> has been edited!`,
       });
     },
   );

@@ -77,7 +77,8 @@ export async function newApp(slackApp: Slack.App) {
         user: body.user.id,
         bot: botId,
         interval: Number(
-          view.state.values.interval_select.interval_select_action.value ?? 5,
+          view.state.values.interval_select.interval_select_action
+            .selected_option?.value ?? 5,
         ),
         conversations:
           view.state.values.notify_select.notify_select_action.selected_conversations?.join(

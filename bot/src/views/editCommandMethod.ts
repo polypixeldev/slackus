@@ -2,17 +2,12 @@ import Slack from "@slack/bolt";
 
 import { prisma } from "../util/prisma.js";
 
-export async function newCommandMethod(slackApp: Slack.App) {
+export async function editCommandMethod(slackApp: Slack.App) {
   slackApp.view(
-    "newCommandMethod",
+    "editCommandMethod",
     async ({ ack, view, client, body, respond }) => {
       if (body.type === "view_closed") {
         await ack();
-        await prisma.app.delete({
-          where: {
-            id: view.private_metadata,
-          },
-        });
         return;
       }
 
@@ -45,23 +40,19 @@ export async function newCommandMethod(slackApp: Slack.App) {
       if (!command || !botCommands.includes(command?.split(" ")[0])) {
         await client.chat.postMessage({
           channel: body.user.id,
-          text: `Unfortunately, Slackus was unable to start monitoring your bot, as the command \`${command}\` does not exist on <@${botRes.bot?.user_id}>.`,
-        });
-        await prisma.method.delete({
-          where: {
-            appId: app.id,
-          },
-        });
-        await prisma.app.delete({
-          where: {
-            id: app.id,
-          },
+          text: `Unfortunately, Slackus was unable to edit your app, as the command \`${command}\` does not exist on <@${botRes.bot?.user_id}>.`,
         });
         return;
       }
 
-      await prisma.commandMethod.create({
-        data: {
+      await prisma.commandMethod.upsert({
+        where: {
+          methodId: app.method!.id,
+        },
+        update: {
+          command,
+        },
+        create: {
           command,
           methodId: app.method!.id,
         },
@@ -69,7 +60,7 @@ export async function newCommandMethod(slackApp: Slack.App) {
 
       await client.chat.postMessage({
         channel: body.user.id,
-        text: `Slackus app <@${botRes.bot?.user_id}> has been created!`,
+        text: `Slackus app <@${botRes.bot?.user_id}> has been edited!`,
       });
     },
   );
