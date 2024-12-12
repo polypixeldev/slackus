@@ -1,4 +1,5 @@
 import Slack from "@slack/bolt";
+import log from "loglevel";
 
 import { prisma } from "../util/prisma.js";
 
@@ -29,16 +30,27 @@ export async function newCommandMethod(slackApp: Slack.App) {
         },
       });
 
-      if (!app) return;
+      if (!app) {
+        log.error(`Tried to edit nonexistent app ${view.private_metadata}`);
+        return;
+      }
 
       const botId = app.bot;
       const botRes = await client.bots.info({
         bot: botId,
       });
       const appId = botRes.bot?.app_id;
-      const botCommands = await fetch(
-        `${process.env.RUNNER_URL}/commands?appId=${appId}`,
-      ).then((r) => r.json());
+      let botCommands;
+      try {
+        botCommands = await fetch(
+          `${process.env.RUNNER_URL}/commands?appId=${appId}`,
+        ).then((r) => r.json());
+      } catch (e) {
+        log.error(
+          `Error when fetching commands for bot ${botId} (${botRes.bot?.name}): ${e}`,
+        );
+        return;
+      }
 
       const command =
         view.state.values.command_input.command_input_action.value;

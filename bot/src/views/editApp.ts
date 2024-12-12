@@ -1,11 +1,9 @@
 import Slack from "@slack/bolt";
+import log from "loglevel";
 
 import { prisma } from "../util/prisma.js";
-import newCommandMethod from "../blocks/newCommandMethod.js";
 import editCommandMethod from "../blocks/editCommandMethod.js";
-import newHttpMethod from "../blocks/newHttpMethod.js";
 import editHttpMethod from "../blocks/editHttpMethod.js";
-import newHeartbeatMethod from "../blocks/newHeartbeatMethod.js";
 
 import type { MethodType } from "@prisma/client";
 
@@ -78,9 +76,14 @@ export async function editApp(slackApp: Slack.App) {
             },
           });
 
+          if (!commandMethod) {
+            log.error(`No command method found for app ${app.id}`);
+            return;
+          }
+
           await ack({
             response_action: "push",
-            view: editCommandMethod(app.id, commandMethod!),
+            view: editCommandMethod(app.id, commandMethod),
           });
 
           break;
@@ -93,9 +96,14 @@ export async function editApp(slackApp: Slack.App) {
             },
           });
 
+          if (!httpMethod) {
+            log.error(`No HTTP method found for app ${app.id}`);
+            return;
+          }
+
           await ack({
             response_action: "push",
-            view: editHttpMethod(app.id, httpMethod!),
+            view: editHttpMethod(app.id, httpMethod),
           });
 
           break;

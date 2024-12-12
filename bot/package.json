@@ -13,6 +13,8 @@
   "dependencies": {
     "@prisma/client": "^5.20.0",
     "@slack/bolt": "^3.22.0",
+    "loglevel": "^1.9.2",
+    "loglevel-plugin-prefix": "^0.8.4",
     "pretty-ms": "^9.1.0",
     "strip-indent": "^4.0.0"
   },

@@ -1,4 +1,5 @@
 import { prisma } from "./prisma.js";
+import log from "loglevel";
 
 import type { App as SlackApp } from "@slack/bolt";
 import type { App, Check, Method } from "@prisma/client";
@@ -21,7 +22,7 @@ export async function runChecks(slackApp: SlackApp) {
     }
   }
 
-  console.log(`Running ${appsToCheck.length} check(s)...`);
+  log.info(`Running ${appsToCheck.length} check(s)...`);
 
   for (const app of appsToCheck) {
     await checkApp(slackApp, app);
@@ -34,13 +35,13 @@ export async function checkApp(
 ) {
   let runnerLocked = false;
   do {
-    console.log("Checking for runner lock...");
+    log.debug("Checking for runner lock...");
     try {
       runnerLocked = await fetch(`${process.env.RUNNER_URL}/locked`).then((r) =>
         r.json(),
       );
     } catch {
-      console.error("Runner lock check errored, assuming locked...");
+      log.error("Runner lock check errored, assuming locked...");
       runnerLocked = true;
     }
 
@@ -49,10 +50,10 @@ export async function checkApp(
     }
   } while (runnerLocked);
 
-  console.log(`Runner unlocked, checking app ${app.id}`);
+  log.debug(`Runner unlocked, checking app ${app.id}`);
 
   if (!app.method) {
-    console.error(`No method found for app ${app.id}`);
+    log.error(`No method found for app ${app.id}`);
     return;
   }
 
@@ -70,7 +71,7 @@ export async function checkApp(
       });
 
       if (!commandMethod) {
-        console.error(`No command method found for app ${app.id}`);
+        log.error(`No command method found for app ${app.id}`);
         return;
       }
 
@@ -89,7 +90,7 @@ export async function checkApp(
       });
 
       if (!httpMethod) {
-        console.error(`No HTTP method found for app ${app.id}`);
+        log.error(`No HTTP method found for app ${app.id}`);
         return;
       }
 

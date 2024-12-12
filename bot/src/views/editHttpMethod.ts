@@ -1,5 +1,6 @@
 import Slack from "@slack/bolt";
 import URL from "url";
+import log from "loglevel";
 
 import { prisma } from "../util/prisma.js";
 
@@ -27,6 +28,7 @@ export async function editHttpMethod(slackApp: Slack.App) {
       });
 
       if (!app) {
+        log.error(`Tried to edit nonexistent app ${view.private_metadata}`);
         await ack();
         return;
       }

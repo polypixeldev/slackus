@@ -1,5 +1,7 @@
 import "dotenv/config";
 import Slack from "@slack/bolt";
+import log from "loglevel";
+import prefixer from "loglevel-plugin-prefix";
 
 import { prisma } from "./util/prisma.js";
 import { runChecks } from "./util/check.js";
@@ -9,33 +11,46 @@ import * as commands from "./commands/index.js";
 import * as events from "./events/index.js";
 import * as views from "./views/index.js";
 
+prefixer.reg(log);
+prefixer.apply(log);
+
+const LOG_LEVEL = process.env.LOG_LEVEL ?? "INFO";
+log.setDefaultLevel("INFO");
+log.setLevel(LOG_LEVEL as log.LogLevelDesc);
+
 const receiver = new Slack.ExpressReceiver({
   signingSecret: process.env.SLACK_SIGNING_SECRET!,
 });
 
+const SLACK_LOG_LEVEL =
+  LOG_LEVEL in Slack.LogLevel
+    ? Slack.LogLevel[LOG_LEVEL as keyof typeof Slack.LogLevel]
+    : Slack.LogLevel.INFO;
+
 const slackApp = new Slack.App({
   token: process.env.SLACK_BOT_TOKEN,
   receiver,
+  logLevel: SLACK_LOG_LEVEL,
 });
 
 for (const [name, action] of Object.entries(actions)) {
   action(slackApp);
-  console.log(`Registered action: ${name}`);
+  log.debug(`Registered action: ${name}`);
 }
 
 for (const [name, command] of Object.entries(commands)) {
   command(slackApp);
-  console.log(`Registered command: ${name}`);
+  log.debug(`Registered command: ${name}`);
 }
 
 for (const [name, event] of Object.entries(events)) {
   event(slackApp);
-  console.log(`Registered event: ${name}`);
+  log.debug(`Registered event: ${name}`);
 }
 
 for (const [name, view] of Object.entries(views)) {
   view(slackApp);
-  console.log(`Registered view: ${name}`);
+  log.debug(`Registered view: ${name}`);
 }
 
 receiver.router.get("/heartbeat", async (req, res) => {
@@ -78,6 +93,7 @@ setInterval(
 runChecks(slackApp);
 
 (async () => {
-  await slackApp.start(process.env.PORT ?? 4000);
-  console.log("Slackus is up!");
+  const port = process.env.PORT ?? 4000;
+  await slackApp.start(port);
+  log.info(`Slackus is up! (Listening on port ${port})`);
 })();

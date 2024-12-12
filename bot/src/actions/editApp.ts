@@ -1,4 +1,5 @@
 import Slack from "@slack/bolt";
+import log from "loglevel";
 
 import { prisma } from "../util/prisma.js";
 import editAppView from "../blocks/editApp.js";
@@ -20,7 +21,10 @@ export async function editApp(slackApp: Slack.App) {
       },
     });
 
-    if (!app) return;
+    if (!app) {
+      log.error(`Tried to edit nonexistent app ${appId}`);
+      return;
+    }
 
     const botRes = await client.bots.info({
       bot: app.bot,
