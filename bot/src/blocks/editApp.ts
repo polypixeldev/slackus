@@ -59,6 +59,35 @@ export default function editApp(
             action_id: "check",
             value: app.id,
           },
+          {
+            type: "button",
+            text: {
+              type: "plain_text",
+              text: "Delete app",
+            },
+            action_id: "delete",
+            style: "danger",
+            confirm: {
+              title: {
+                type: "plain_text",
+                text: `Delete Slackus app ${botName}?`,
+              },
+              text: {
+                type: "plain_text",
+                text: `This will remove ${botName} from your Slackus dashboard and delete all uptime data. This will not affect the Slack bot itself.`,
+              },
+              confirm: {
+                type: "plain_text",
+                text: `Delete app`,
+              },
+              deny: {
+                type: "plain_text",
+                text: `Cancel`,
+              },
+              style: "danger",
+            },
+            value: app.id,
+          },
         ],
       },
       {
