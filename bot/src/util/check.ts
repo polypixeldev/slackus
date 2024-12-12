@@ -24,9 +24,22 @@ export async function runChecks(slackApp: SlackApp) {
 
   log.info(`Running ${appsToCheck.length} check(s)...`);
 
+  let successCount = 0;
+  let failedCount = 0;
   for (const app of appsToCheck) {
-    await checkApp(slackApp, app);
+    const failed = await checkApp(slackApp, app);
+
+    if (failed == true) {
+      failedCount++;
+    } else if (failed == false) {
+      successCount++;
+    }
   }
+  const totalCount = successCount + failedCount;
+
+  log.info(
+    `Successfully ran ${totalCount}/${appsToCheck.length} check(s) (${successCount} success, ${failedCount} fail, ${appsToCheck.length - totalCount} error)`,
+  );
 }
 
 export async function checkApp(
@@ -151,4 +164,6 @@ export async function checkApp(
       status: failed ? "down" : "up",
     },
   });
+
+  return failed;
 }
