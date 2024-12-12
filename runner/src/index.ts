@@ -3,8 +3,21 @@ import puppeteer from "puppeteer";
 import Express from "express";
 import readline from "readline/promises";
 import fs from "fs";
+import log from "loglevel";
+import prefixer from "loglevel-plugin-prefix";
+
+prefixer.reg(log);
+prefixer.apply(log);
+
+const LOG_LEVEL = process.env.LOG_LEVEL ?? "INFO";
+log.setDefaultLevel("INFO");
+log.setLevel(LOG_LEVEL as log.LogLevelDesc);
 
 const app = Express();
+app.use((req, res, next) => {
+  log.debug(`HTTP ${req.method} ${req.path}`);
+  next();
+});
 
 (async () => {
   const SLACK_BASE_URL = `https://${process.env.SLACK_ORG}.slack.com`;
@@ -12,10 +25,10 @@ const app = Express();
 
   let cookies;
   if (fs.existsSync(".cookies")) {
-    console.log("using existing cookies to log into slack");
+    log.debug("Logging into Slack using existing .cookies file");
     cookies = JSON.parse(fs.readFileSync(".cookies", { encoding: "utf8" }));
   } else {
-    console.log("logging in to slack");
+    log.debug("Logging into Slack using browser");
     const loginPage = await browser.newPage();
     await loginPage.goto(`${SLACK_BASE_URL}/sign_in_with_password`, {
       waitUntil: "networkidle2",
@@ -66,13 +79,16 @@ const app = Express();
       await loginPage.waitForNavigation();
     }
 
-    console.log("logged in to slack - cookies are saved in .cookies");
+    log.debug(
+      "Slack browser login successful - cookies saved in .cookies file",
+    );
     cookies = await loginPage.cookies();
 
     await fs.writeFileSync(".cookies", JSON.stringify(cookies));
 
     await loginPage.close();
   }
+  log.info("Logged into Slack");
 
   app.get("/commands", async (req, res) => {
     const runnerPage = await browser.newPage();
@@ -111,7 +127,6 @@ const app = Express();
   });
 
   app.get("/check", async (req, res, next) => {
-    console.log("Checking app");
     locked = true;
     const runnerPage = await browser.newPage();
     await runnerPage.setCookie(...cookies);
@@ -194,20 +209,23 @@ const app = Express();
   });
 
   app.use((req, res, next) => {
-    console.log("Unlocking runner");
-    if (req.path === "/check") {
+    if (req.path === "/check" && locked) {
+      log.debug("Unlocking runner");
       locked = false;
     }
     next();
   });
   // @ts-expect-error
   app.use((err, req, res, next) => {
-    console.error(err);
-    if (req.path === "/check") {
+    log.error(err);
+    if (req.path === "/check" && locked) {
+      log.debug("Unlocking runner");
       locked = false;
     }
     next(err);
   });
 
-  app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT ?? 3000;
+  app.listen(port);
+  log.info(`Slackus runner is up (listening on port ${port})`);
 })();
