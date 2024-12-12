@@ -87,7 +87,7 @@ setInterval(
   () => {
     runChecks(slackApp);
   },
-  5 * 60 * 1000,
+  3 * 60 * 1000,
 );
 
 runChecks(slackApp);
