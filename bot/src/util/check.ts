@@ -46,29 +46,33 @@ export async function checkApp(
   slackApp: SlackApp,
   app: App & { checks: Check[]; method: Method | null },
 ) {
-  let runnerLocked = false;
-  do {
-    log.debug("Checking for runner lock...");
-    try {
-      runnerLocked = await fetch(`${process.env.RUNNER_URL}/locked`).then((r) =>
-        r.json(),
-      );
-    } catch {
-      log.error("Runner lock check errored, assuming locked...");
-      runnerLocked = true;
-    }
-
-    if (runnerLocked) {
-      await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
-    }
-  } while (runnerLocked);
-
-  log.debug(`Runner unlocked, checking app ${app.id}`);
-
   if (!app.method) {
     log.error(`No method found for app ${app.id}`);
     return;
   }
+
+  if (app.method.type == "Command") {
+    let runnerLocked = false;
+    do {
+      log.debug("Checking for runner lock...");
+      try {
+        runnerLocked = await fetch(`${process.env.RUNNER_URL}/locked`).then(
+          (r) => r.json(),
+        );
+      } catch {
+        log.error("Runner lock check errored, assuming locked...");
+        runnerLocked = true;
+      }
+
+      if (runnerLocked) {
+        await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
+      }
+    } while (runnerLocked);
+
+    log.debug(`Runner unlocked, checking app ${app.id}`);
+  }
+
+  log.debug(`Checking app ${app.id}`);
 
   const botRes = await slackApp.client.bots.info({
     bot: app.bot,
