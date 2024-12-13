@@ -5,13 +5,17 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "tsc && node dist/index.js"
+    "start": "tsc && node dist/index.js",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org polypixeldev --project slackus ./dist && sentry-cli sourcemaps upload --org polypixeldev --project slackus ./dist"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.20.0",
+    "@sentry/cli": "^2.39.1",
+    "@sentry/node": "^8.44.0",
+    "@sentry/profiling-node": "^8.44.0",
     "@slack/bolt": "^3.22.0",
     "loglevel": "^1.9.2",
     "loglevel-plugin-prefix": "^0.8.4",

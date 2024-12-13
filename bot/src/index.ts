@@ -1,7 +1,9 @@
 import "dotenv/config";
+import "./util/instrument.js";
 import Slack from "@slack/bolt";
 import log from "loglevel";
 import prefixer from "loglevel-plugin-prefix";
+import * as Sentry from "@sentry/node";
 
 import { prisma } from "./util/prisma.js";
 import { runChecks } from "./util/check.js";
@@ -52,6 +54,11 @@ for (const [name, view] of Object.entries(views)) {
   view(slackApp);
   log.debug(`Registered view: ${name}`);
 }
+
+slackApp.error(async (error) => {
+  log.error(error);
+  Sentry.captureException(error.original);
+});
 
 receiver.router.get("/heartbeat", async (req, res) => {
   const appId = req.query.app?.toString();
