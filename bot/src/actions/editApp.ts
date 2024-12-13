@@ -36,7 +36,7 @@ export async function editApp(slackApp: Slack.App) {
 
     await client.views.open({
       trigger_id: body.trigger_id,
-      view: editAppView(app, userRes.user?.name!),
+      view: editAppView(app, userRes.user?.real_name!),
     });
   });
 }
