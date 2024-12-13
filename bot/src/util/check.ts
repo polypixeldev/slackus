@@ -146,56 +146,53 @@ export async function checkApp(
     .toString()
     .trim()
     .slice(0, 7);
+  const userNameRes = await slackApp.client.users.profile.get({
+    user: app.user,
+  });
+  const userName = userNameRes?.profile?.display_name ?? app.user;
+
+  const defaultAttachment = {
+    title: "",
+    color: "",
+    fallback: "",
+    bot_id: botRes.bot?.id,
+    fields: [
+      {
+        title: "Method",
+        value: app.method.type,
+      },
+      {
+        title: "Maintainer",
+        value: `<https://hackclub.slack.com/team/${app.user}|${userName}>`,
+      },
+    ],
+    footer: `Slackus @ ${commit} | ${new Date().toLocaleString()}`,
+  };
 
   if ((app.checks.at(-1)?.status === "up" || firstCheck) && failed) {
     const conversations = app.conversations.split(",");
+    defaultAttachment["title"] = `App <@${botRes.bot?.user_id}> is down!`;
+    defaultAttachment["fallback"] = `App <@${botRes.bot?.user_id}> is down!`;
+    defaultAttachment["color"] = "danger";
 
     for (const conversation of conversations) {
       await slackApp.client.chat.postMessage({
         channel: conversation,
-        attachments: [
-          {
-            color: "danger",
-            bot_id: botRes.bot?.id,
-            title: `App <@${botRes.bot?.user_id}> is down!`,
-            fields: [
-              {
-                title: "Method",
-                value: app.method.type,
-              },
-            ],
-            footer: `Slackus @ ${commit} | ${new Date().toLocaleString()}`,
-            fallback: `App <@${botRes.bot?.user_id}> is down!`,
-          },
-        ],
-        text: `App <@${botRes.bot?.user_id}> is down!`,
+        attachments: [defaultAttachment],
       });
     }
 
     updateDashboard(slackApp, app.user);
-  }
-
-  if ((app.checks.at(-1)?.status === "down" || firstCheck) && !failed) {
+  } else if ((app.checks.at(-1)?.status === "down" || firstCheck) && !failed) {
     const conversations = app.conversations.split(",");
+    defaultAttachment["title"] = `App <@${botRes.bot?.user_id}> is up!`;
+    defaultAttachment["fallback"] = `App <@${botRes.bot?.user_id}> is up!`;
+    defaultAttachment["color"] = "good";
 
     for (const conversation of conversations) {
       await slackApp.client.chat.postMessage({
         channel: conversation,
-        attachments: [
-          {
-            color: "good",
-            bot_id: botRes.bot?.id,
-            title: `App <@${botRes.bot?.user_id}> is up!`,
-            fields: [
-              {
-                title: "Method",
-                value: app.method.type,
-              },
-            ],
-            footer: `Slackus @ ${commit} | ${new Date().toLocaleString()}`,
-            fallback: `App <@${botRes.bot?.user_id}> is up!`,
-          },
-        ],
+        attachments: [defaultAttachment],
       });
     }
 
