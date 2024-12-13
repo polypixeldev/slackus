@@ -1,6 +1,7 @@
 import Slack from "@slack/bolt";
 
 import { prisma } from "../util/prisma.js";
+import { updateDashboard } from "../util/updateDashboard.js";
 
 export async function deleteApp(slackApp: Slack.App) {
   slackApp.action("delete", async ({ ack, client, body, action }) => {
@@ -15,5 +16,7 @@ export async function deleteApp(slackApp: Slack.App) {
         id: appId,
       },
     });
+
+    updateDashboard(slackApp, body.user.id);
   });
 }

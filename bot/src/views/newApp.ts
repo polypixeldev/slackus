@@ -4,6 +4,7 @@ import { prisma } from "../util/prisma.js";
 import newCommandMethod from "../blocks/newCommandMethod.js";
 import newHttpMethod from "../blocks/newHttpMethod.js";
 import newHeartbeatMethod from "../blocks/newHeartbeatMethod.js";
+import { updateDashboard } from "../util/updateDashboard.js";
 
 import type { MethodType } from "@prisma/client";
 
@@ -86,6 +87,8 @@ export async function newApp(slackApp: Slack.App) {
           ) ?? body.user.id,
       },
     });
+
+    updateDashboard(slackApp, body.user.id);
 
     const methodType = view.state.values.method_select.method_select_action
       .selected_option?.value as MethodType;
