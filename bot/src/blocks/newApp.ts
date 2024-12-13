@@ -9,7 +9,7 @@ export default function newApp(dmId: string) {
     },
     submit: {
       type: "plain_text" as const,
-      text: "Submit",
+      text: "Next",
       emoji: true,
     },
     close: {

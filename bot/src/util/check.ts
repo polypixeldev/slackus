@@ -1,5 +1,6 @@
 import { prisma } from "./prisma.js";
 import log from "loglevel";
+import child_process from "child_process";
 
 import type { App as SlackApp } from "@slack/bolt";
 import type { App, Check, Method } from "@prisma/client";
@@ -138,6 +139,11 @@ export async function checkApp(
   }
 
   const firstCheck = app.checks.length === 0;
+  const commit = child_process
+    .execSync("git rev-parse HEAD")
+    .toString()
+    .trim()
+    .slice(0, 7);
 
   if ((app.checks.at(-1)?.status === "up" || firstCheck) && failed) {
     const conversations = app.conversations.split(",");
@@ -145,6 +151,21 @@ export async function checkApp(
     for (const conversation of conversations) {
       await slackApp.client.chat.postMessage({
         channel: conversation,
+        attachments: [
+          {
+            color: "danger",
+            bot_id: botRes.bot?.id,
+            title: `App <@${botRes.bot?.user_id}> is down!`,
+            fields: [
+              {
+                title: "Method",
+                value: app.method.type,
+              },
+            ],
+            footer: `Slackus @ ${commit} | ${new Date().toLocaleString()}`,
+            fallback: `App <@${botRes.bot?.user_id}> is down!`,
+          },
+        ],
         text: `App <@${botRes.bot?.user_id}> is down!`,
       });
     }
@@ -156,7 +177,21 @@ export async function checkApp(
     for (const conversation of conversations) {
       await slackApp.client.chat.postMessage({
         channel: conversation,
-        text: `App <@${botRes.bot?.user_id}> is up!`,
+        attachments: [
+          {
+            color: "good",
+            bot_id: botRes.bot?.id,
+            title: `App <@${botRes.bot?.user_id}> is up!`,
+            fields: [
+              {
+                title: "Method",
+                value: app.method.type,
+              },
+            ],
+            footer: `Slackus @ ${commit} | ${new Date().toLocaleString()}`,
+            fallback: `App <@${botRes.bot?.user_id}> is up!`,
+          },
+        ],
       });
     }
   }
