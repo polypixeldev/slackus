@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsc && node dist/index.js"
+    "start": "tsc && node dist/index.js",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org polypixeldev --project slackus ./dist && sentry-cli sourcemaps upload --org polypixeldev --project slackus ./dist"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,9 @@
     "typescript": "^5.6.3"
   },
   "dependencies": {
+    "@sentry/cli": "^2.39.1",
+    "@sentry/node": "^8.44.0",
+    "@sentry/profiling-node": "^8.44.0",
     "express": "^4.21.1",
     "loglevel": "^1.9.2",
     "loglevel-plugin-prefix": "^0.8.4",

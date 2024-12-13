@@ -1,4 +1,6 @@
 import "dotenv/config";
+import "./instrument";
+import * as Sentry from "@sentry/node";
 import puppeteer from "puppeteer";
 import Express from "express";
 import readline from "readline/promises";
@@ -215,6 +217,9 @@ app.use((req, res, next) => {
     }
     next();
   });
+
+  Sentry.setupExpressErrorHandler(app);
+
   // @ts-expect-error
   app.use((err, req, res, next) => {
     log.error(err);
