@@ -2,6 +2,8 @@ import { prisma } from "./prisma.js";
 import log from "loglevel";
 import child_process from "child_process";
 
+import { updateDashboard } from "./updateDashboard.js";
+
 import type { App as SlackApp } from "@slack/bolt";
 import type { App, Check, Method } from "@prisma/client";
 
@@ -169,6 +171,8 @@ export async function checkApp(
         text: `App <@${botRes.bot?.user_id}> is down!`,
       });
     }
+
+    updateDashboard(slackApp, app.user);
   }
 
   if ((app.checks.at(-1)?.status === "down" || firstCheck) && !failed) {
@@ -194,6 +198,8 @@ export async function checkApp(
         ],
       });
     }
+
+    updateDashboard(slackApp, app.user);
   }
 
   await prisma.check.create({
