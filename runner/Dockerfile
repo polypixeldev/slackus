@@ -6,12 +6,12 @@ libdbus-1-3 libdrm2 libexpat1 libgbm1 libglib2.0-0 libnspr4 libnss3 libpango-1.0
 libudev1 libuuid1 libx11-6 libx11-xcb1 libxcb-dri3-0 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 \
 libxfixes3 libxi6 libxkbcommon0 libxrandr2 libxrender1 libxshmfence1 libxss1 libxtst6
 RUN useradd -ms /bin/bash runner
+COPY . .
+RUN chown -R runner /home/runner
 RUN corepack enable
 
 USER runner
 WORKDIR /home/runner/app
-
-COPY . .
 
 RUN pnpm install
 RUN npx puppeteer browsers install chrome
