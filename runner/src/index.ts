@@ -157,7 +157,7 @@ app.use((req, res, next) => {
 
     if (!commandChoices) {
       for (let i = 0; i < command.split(" ")[0].length; i++) {
-        runnerPage.keyboard.press("Backspace");
+        await runnerPage.keyboard.press("Backspace");
       }
 
       res.json(true);
