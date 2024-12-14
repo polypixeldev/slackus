@@ -242,7 +242,7 @@ app.use((req, res, next) => {
       log.debug("Unlocking runner");
       locked = false;
     }
-    next(err);
+    res.sendStatus(500);
   });
 
   const port = process.env.PORT ?? 3000;
