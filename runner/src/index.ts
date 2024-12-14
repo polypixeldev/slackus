@@ -137,6 +137,11 @@ app.use((req, res, next) => {
   });
 
   app.get("/check", async (req, res, next) => {
+    if (locked) {
+      res.sendStatus(429);
+      return;
+    }
+
     locked = true;
     const runnerPage = await browser.newPage();
     await runnerPage.setCookie(...cookies);
