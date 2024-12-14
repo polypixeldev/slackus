@@ -150,7 +150,7 @@ app.use((req, res, next) => {
     );
 
     await runnerPage.waitForSelector(".ql-editor", {
-      timeout: 5000,
+      timeout: 10000,
     });
 
     const command = req.query.command!.toString();
