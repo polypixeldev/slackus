@@ -15,7 +15,7 @@ services:
     restart: always
   runner:
     build:
-      context: .
+      context: ./runner
       dockerfile: Dockerfile
     ports:
       - "33441:3000"
