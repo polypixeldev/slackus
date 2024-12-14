@@ -6,5 +6,6 @@ COPY . .
 
 RUN corepack enable
 RUN pnpm install
+RUN npx puppeteer browsers install chrome
 
 CMD ["pnpm", "start"]
