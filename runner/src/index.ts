@@ -23,7 +23,9 @@ app.use((req, res, next) => {
 
 (async () => {
   const SLACK_BASE_URL = `https://${process.env.SLACK_ORG}.slack.com`;
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
 
   let cookies;
   if (fs.existsSync(".cookies")) {
