@@ -3,7 +3,7 @@ services:
   bot:
     build:
       context: .
-      dockerfile: bot/Dockerfile
+      dockerfile: ./bot/Dockerfile
     ports:
       - "43627:3000"
     volumes:
