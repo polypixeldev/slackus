@@ -144,7 +144,9 @@ app.use((req, res, next) => {
       `https://app.slack.com/client/${process.env.SLACK_TEAM}/${process.env.SLACK_CHANNEL}`,
     );
 
-    await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
+    await runnerPage.waitForSelector(".ql-editor", {
+      timeout: 5000,
+    });
 
     const command = req.query.command!.toString();
     await runnerPage.type(`.ql-editor`, command.split(" ")[0]);
