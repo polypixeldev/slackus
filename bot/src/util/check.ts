@@ -60,9 +60,12 @@ export async function checkApp(
     do {
       log.debug("Checking for runner lock...");
       try {
-        runnerLocked = await fetch(`${process.env.RUNNER_URL}/locked`).then(
-          (r) => r.json(),
-        );
+        runnerLocked = await fetch(`${process.env.RUNNER_URL}/locked`, {
+          // @ts-expect-error
+          headers: {
+            Authorization: process.env.API_SECRET,
+          },
+        }).then((r) => r.json());
       } catch {
         log.error("Runner lock check errored, assuming locked...");
         runnerLocked = true;
@@ -98,6 +101,12 @@ export async function checkApp(
 
       failed = await fetch(
         `${process.env.RUNNER_URL}/check?command=${encodeURIComponent(commandMethod.command)}`,
+        {
+          // @ts-expect-error
+          headers: {
+            Authorization: process.env.API_SECRET,
+          },
+        },
       ).then((r) => r.json());
 
       break;

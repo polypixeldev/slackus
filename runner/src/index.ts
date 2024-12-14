@@ -92,6 +92,14 @@ app.use((req, res, next) => {
   }
   log.info("Logged into Slack");
 
+  app.use((req, res, next) => {
+    if (req.headers.authorization !== process.env.API_SECRET) {
+      res.sendStatus(403);
+    } else {
+      next();
+    }
+  });
+
   app.get("/commands", async (req, res) => {
     const runnerPage = await browser.newPage();
     await runnerPage.setCookie(...cookies);

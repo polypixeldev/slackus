@@ -44,6 +44,12 @@ export async function newCommandMethod(slackApp: Slack.App) {
       try {
         botCommands = await fetch(
           `${process.env.RUNNER_URL}/commands?appId=${appId}`,
+          {
+            // @ts-expect-error
+            headers: {
+              Authorization: process.env.API_SECRET,
+            },
+          },
         ).then((r) => r.json());
       } catch (e) {
         log.error(
