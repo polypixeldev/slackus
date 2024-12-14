@@ -1,6 +1,7 @@
 import { prisma } from "./prisma.js";
 import log from "loglevel";
 import child_process from "child_process";
+import * as Sentry from "@sentry/node";
 
 import { updateDashboard } from "./updateDashboard.js";
 
@@ -152,9 +153,6 @@ export async function checkApp(
   const userName = userNameRes?.profile?.display_name ?? app.user;
 
   const defaultAttachment = {
-    title: "",
-    color: "",
-    fallback: "",
     bot_id: botRes.bot?.id,
     fields: [
       {
@@ -171,29 +169,53 @@ export async function checkApp(
   const conversations = app.conversations.split(",");
   conversations.push(...app.subscribers.split(","));
 
-  if ((app.checks.at(-1)?.status === "up" || firstCheck) && failed) {
-    defaultAttachment["title"] = `App <@${botRes.bot?.user_id}> is down!`;
-    defaultAttachment["fallback"] = `App <@${botRes.bot?.user_id}> is down!`;
-    defaultAttachment["color"] = "danger";
+  const messages: { [id: string]: any } = {};
 
+  if ((app.checks.at(-1)?.status === "up" || firstCheck) && failed) {
     for (const conversation of conversations) {
-      await slackApp.client.chat.postMessage({
-        channel: conversation,
-        attachments: [defaultAttachment],
-      });
+      messages[conversation] = {
+        ...defaultAttachment,
+        title: `App <@${botRes.bot?.user_id}> is down!`,
+        fallback: `App <@${botRes.bot?.user_id}> is down!`,
+        color: "danger",
+      };
     }
 
     updateDashboard(slackApp, app.user);
   } else if ((app.checks.at(-1)?.status === "down" || firstCheck) && !failed) {
-    defaultAttachment["title"] = `App <@${botRes.bot?.user_id}> is up!`;
-    defaultAttachment["fallback"] = `App <@${botRes.bot?.user_id}> is up!`;
-    defaultAttachment["color"] = "good";
-
     for (const conversation of conversations) {
-      await slackApp.client.chat.postMessage({
-        channel: conversation,
-        attachments: [defaultAttachment],
-      });
+      messages[conversation] = {
+        ...defaultAttachment,
+        title: `App <@${botRes.bot?.user_id}> is up!`,
+        fallback: `App <@${botRes.bot?.user_id}> is up!`,
+        color: "good",
+      };
+    }
+  }
+
+  if (Object.keys(messages).length > 0) {
+    for (const conversation in messages) {
+      slackApp.client.chat
+        .postMessage({
+          channel: conversation,
+          attachments: [messages[conversation]],
+        })
+        .then((r) => {
+          if (r.error) {
+            slackApp.client.chat.postMessage({
+              channel: app.user,
+              text: `There was an error when sending a notification for <@${botRes.bot?.user_id}> to <#${conversation}>. Please make sure <@U07RPCNGR2L> has access to this conversation or contact <@U04G40QKAAD> if this persists.\n\`\`\`${r.error}\`\`\``,
+            });
+            Sentry.captureException(r.error);
+          }
+        })
+        .catch((e) => {
+          slackApp.client.chat.postMessage({
+            channel: app.user,
+            text: `There was an error when sending a notification for <@${botRes.bot?.user_id}> to <#${conversation}>. Please make sure <@U07RPCNGR2L> has access to this conversation or contact <@U04G40QKAAD> if this persists.\n\`\`\`${e}\`\`\``,
+          });
+          Sentry.captureException(e);
+        });
     }
 
     updateDashboard(slackApp, app.user);
