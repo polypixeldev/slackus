@@ -11,6 +11,7 @@ services:
     env_file: ./bot/.env
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/slackus
+      RUNNER_URL: http://runner:3000
     restart: always
   runner:
     build:
