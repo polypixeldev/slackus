@@ -8,7 +8,7 @@ services:
       - "43627:3000"
     volumes:
       - "./bot:/usr/src/app"
-    env_file: .env
+    env_file: ./bot/.env
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/slackus
     restart: always
@@ -20,7 +20,7 @@ services:
       - "33441:3000"
     volumes:
       - "./runner:/usr/src/app"
-    env_file: .env
+    env_file: ./runner/.env
     restart: always
   db:
     image: postgres:alpine
