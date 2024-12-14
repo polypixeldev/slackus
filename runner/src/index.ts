@@ -219,7 +219,7 @@ app.use((req, res, next) => {
   });
 
   app.use((req, res, next) => {
-    if (req.path === "/check" && locked) {
+    if (locked) {
       log.debug("Unlocking runner");
       locked = false;
     }
@@ -231,7 +231,7 @@ app.use((req, res, next) => {
   // @ts-expect-error
   app.use((err, req, res, next) => {
     log.error(err);
-    if (req.path === "/check" && locked) {
+    if (locked) {
       log.debug("Unlocking runner");
       locked = false;
     }
