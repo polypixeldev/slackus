@@ -176,7 +176,7 @@ export async function checkApp(
     footer: `Slackus @ ${commit} | ${new Date().toLocaleString()}`,
   };
   const conversations = app.conversations.split(",");
-  conversations.push(...app.subscribers.split(","));
+  conversations.push(...app.subscribers.split(",").filter((c) => c != ""));
 
   const messages: { [id: string]: any } = {};
 
