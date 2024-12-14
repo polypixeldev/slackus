@@ -44,7 +44,7 @@ export default function directory(
             type: "section",
             text: {
               type: "mrkdwn",
-              text: `*<@${botUsers[i]}>*\n_Maintained by <@${app.user}>_\n_Uptime: ${calculateUptime(app)}_`,
+              text: `*<@${botUsers[i]}>*\n_Maintained by <@${app.user}>_\n_${calculateUptime(app)}_`,
             },
             accessory: {
               type: "button",
