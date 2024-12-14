@@ -4,6 +4,8 @@ WORKDIR /usr/src/app
 
 COPY . .
 
+WORKDIR /usr/src/app/bot
+
 RUN corepack enable
 RUN pnpm install
 

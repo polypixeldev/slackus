@@ -2,12 +2,12 @@ version: "3"
 services:
   bot:
     build:
-      context: ./bot
+      context: .
       dockerfile: Dockerfile
     ports:
       - "43627:3000"
     volumes:
-      - "./bot:/usr/src/app"
+      - ".:/usr/src/app"
     env_file: ./bot/.env
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/slackus
@@ -15,7 +15,7 @@ services:
     restart: always
   runner:
     build:
-      context: ./runner
+      context: .
       dockerfile: Dockerfile
     ports:
       - "33441:3000"
