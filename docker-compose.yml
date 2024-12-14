@@ -20,7 +20,7 @@ services:
     ports:
       - "33441:3000"
     volumes:
-      - "./runner:/usr/src/app"
+      - "./runner:/home/runner/app"
     env_file: ./runner/.env
     restart: always
   db:
