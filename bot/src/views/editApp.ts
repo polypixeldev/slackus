@@ -4,6 +4,7 @@ import log from "loglevel";
 import { prisma } from "../util/prisma.js";
 import editCommandMethod from "../blocks/editCommandMethod.js";
 import editHttpMethod from "../blocks/editHttpMethod.js";
+import newHeartbeatMethod from "../blocks/newHeartbeatMethod.js";
 
 import type { MethodType } from "@prisma/client";
 
@@ -110,7 +111,10 @@ export async function editApp(slackApp: Slack.App) {
         }
 
         case "Heartbeat": {
-          await ack();
+          await ack({
+            response_action: "push",
+            view: newHeartbeatMethod(app.id, app.interval),
+          });
 
           break;
         }
@@ -166,7 +170,10 @@ export async function editApp(slackApp: Slack.App) {
         }
 
         case "Heartbeat": {
-          await ack();
+          await ack({
+            response_action: "push",
+            view: newHeartbeatMethod(app.id, app.interval),
+          });
 
           break;
         }
