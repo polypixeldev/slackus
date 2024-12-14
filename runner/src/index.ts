@@ -161,10 +161,11 @@ app.use((req, res, next) => {
 
     const commandChoices = await runnerPage.$$eval(
       ".tab_complete_ui_item",
-      (commandElements) => commandElements.map((e) => e.id),
+      (commandElements) =>
+        commandElements.map((e) => e.id ?? "").filter((e) => e != ""),
     );
 
-    if (!commandChoices) {
+    if (!commandChoices || !commandChoices[0]) {
       for (let i = 0; i < command.split(" ")[0].length; i++) {
         await runnerPage.keyboard.press("Backspace");
       }
