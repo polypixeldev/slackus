@@ -99,15 +99,21 @@ export async function checkApp(
         return;
       }
 
-      failed = await fetch(
-        `${process.env.RUNNER_URL}/check?command=${encodeURIComponent(commandMethod.command)}`,
-        {
-          // @ts-expect-error
-          headers: {
-            Authorization: process.env.API_SECRET,
+      try {
+        failed = await fetch(
+          `${process.env.RUNNER_URL}/check?command=${encodeURIComponent(commandMethod.command)}`,
+          {
+            // @ts-expect-error
+            headers: {
+              Authorization: process.env.API_SECRET,
+            },
           },
-        },
-      ).then((r) => r.json());
+        ).then((r) => r.json());
+      } catch (e) {
+        log.error(`Runner command method check errored on app ${app.id}: ${e}`);
+        Sentry.captureException(e);
+        failed = true;
+      }
 
       break;
     }
