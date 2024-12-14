@@ -168,9 +168,10 @@ export async function checkApp(
     ],
     footer: `Slackus @ ${commit} | ${new Date().toLocaleString()}`,
   };
+  const conversations = app.conversations.split(",");
+  conversations.push(...app.subscribers.split(","));
 
   if ((app.checks.at(-1)?.status === "up" || firstCheck) && failed) {
-    const conversations = app.conversations.split(",");
     defaultAttachment["title"] = `App <@${botRes.bot?.user_id}> is down!`;
     defaultAttachment["fallback"] = `App <@${botRes.bot?.user_id}> is down!`;
     defaultAttachment["color"] = "danger";
@@ -184,7 +185,6 @@ export async function checkApp(
 
     updateDashboard(slackApp, app.user);
   } else if ((app.checks.at(-1)?.status === "down" || firstCheck) && !failed) {
-    const conversations = app.conversations.split(",");
     defaultAttachment["title"] = `App <@${botRes.bot?.user_id}> is up!`;
     defaultAttachment["fallback"] = `App <@${botRes.bot?.user_id}> is up!`;
     defaultAttachment["color"] = "good";

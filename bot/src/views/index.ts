@@ -4,3 +4,4 @@ export { newHttpMethod } from "./newHttpMethod.js";
 export { editApp } from "./editApp.js";
 export { editCommandMethod } from "./editCommandMethod.js";
 export { editHttpMethod } from "./editHttpMethod.js";
+export { directoryView } from "./directoryView.js";
