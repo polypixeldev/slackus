@@ -6,7 +6,7 @@ import prefixer from "loglevel-plugin-prefix";
 import * as Sentry from "@sentry/node";
 
 import { prisma } from "./util/prisma.js";
-import { runChecks } from "./util/check.js";
+import { runChecks, sendNotifications } from "./util/check.js";
 
 import * as actions from "./actions/index.js";
 import * as commands from "./commands/index.js";
@@ -72,12 +72,18 @@ receiver.router.get("/heartbeat", async (req, res) => {
     where: {
       id: appId,
     },
+    include: {
+      checks: true,
+      method: true,
+    },
   });
 
   if (!app) {
     res.sendStatus(400);
     return;
   }
+
+  await sendNotifications(slackApp, app, false);
 
   await prisma.check.create({
     data: {

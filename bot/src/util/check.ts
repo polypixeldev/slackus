@@ -81,10 +81,6 @@ export async function checkApp(
 
   log.debug(`Checking app ${app.id}`);
 
-  const botRes = await slackApp.client.bots.info({
-    bot: app.bot,
-  });
-
   let failed = true;
   switch (app.method.type) {
     case "Command": {
@@ -156,6 +152,28 @@ export async function checkApp(
     }
   }
 
+  await sendNotifications(slackApp, app, failed);
+
+  await prisma.check.create({
+    data: {
+      timestamp: new Date(),
+      appId: app.id,
+      status: failed ? "down" : "up",
+    },
+  });
+
+  return failed;
+}
+
+export async function sendNotifications(
+  slackApp: SlackApp,
+  app: App & { checks: Check[]; method: Method | null },
+  failed: boolean,
+) {
+  const botRes = await slackApp.client.bots.info({
+    bot: app.bot,
+  });
+
   const firstCheck = app.checks.length === 0;
   const commit = child_process
     .execSync("git rev-parse HEAD")
@@ -172,7 +190,7 @@ export async function checkApp(
     fields: [
       {
         title: "Method",
-        value: app.method.type,
+        value: app.method?.type,
       },
       {
         title: "Maintainer",
@@ -235,14 +253,4 @@ export async function checkApp(
 
     updateDashboard(slackApp, app.user);
   }
-
-  await prisma.check.create({
-    data: {
-      timestamp: new Date(),
-      appId: app.id,
-      status: failed ? "down" : "up",
-    },
-  });
-
-  return failed;
 }
