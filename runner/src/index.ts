@@ -156,43 +156,7 @@ app.use((req, res, next) => {
     });
 
     const command = req.query.command!.toString();
-    await runnerPage.type(`.ql-editor`, command.split(" ")[0]);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    const commandChoices = await runnerPage.$$eval(
-      ".tab_complete_ui_item",
-      (commandElements) =>
-        commandElements
-          .filter((e) => e.id != "")
-          .map((e) => ({
-            id: e.id,
-            command: e.querySelector(
-              ".p-slash_commands_autocomplete_menu_entity__name",
-            )?.innerHTML,
-          })),
-    );
-
-    let commandChoice = null;
-    for (const choice of commandChoices) {
-      if (choice.command?.startsWith(`${command}<`)) {
-        commandChoice = choice.id;
-        break;
-      }
-    }
-
-    if (!commandChoice) {
-      for (let i = 0; i < command.split(" ")[0].length; i++) {
-        await runnerPage.keyboard.press("Backspace");
-      }
-
-      res.json(true);
-      await runnerPage.close();
-      next();
-      return;
-    }
-
-    await runnerPage.click(`#${commandChoice}`);
-    await runnerPage.type(`.ql-editor`, command.split(" ").slice(1).join(" "));
+    await runnerPage.type(`.ql-editor`, command);
     await runnerPage.keyboard.press("Enter");
 
     await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
