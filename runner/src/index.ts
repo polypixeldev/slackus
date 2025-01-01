@@ -163,16 +163,24 @@ app.use((req, res, next) => {
       ".tab_complete_ui_item",
       (commandElements) =>
         commandElements
-          .filter((e) =>
-            e
-              .querySelector(".p-slash_commands_autocomplete_menu_entity__name")
-              ?.innerHTML.startsWith(`${command}<`),
-          )
-          .map((e) => e.id ?? "")
-          .filter((e) => e != ""),
+          .filter((e) => e.id != "")
+          .map((e) => ({
+            id: e.id,
+            command: e.querySelector(
+              ".p-slash_commands_autocomplete_menu_entity__name",
+            )?.innerHTML,
+          })),
     );
 
-    if (!commandChoices || !commandChoices[0]) {
+    let commandChoice = null;
+    for (const choice of commandChoices) {
+      if (choice.command?.startsWith(`${command}<`)) {
+        commandChoice = choice.id;
+        break;
+      }
+    }
+
+    if (!commandChoice) {
       for (let i = 0; i < command.split(" ")[0].length; i++) {
         await runnerPage.keyboard.press("Backspace");
       }
@@ -183,7 +191,7 @@ app.use((req, res, next) => {
       return;
     }
 
-    await runnerPage.click(`#${commandChoices[0]}`);
+    await runnerPage.click(`#${commandChoice}`);
     await runnerPage.type(`.ql-editor`, command.split(" ").slice(1).join(" "));
     await runnerPage.keyboard.press("Enter");
 
