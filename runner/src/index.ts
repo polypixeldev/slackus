@@ -162,7 +162,14 @@ app.use((req, res, next) => {
     const commandChoices = await runnerPage.$$eval(
       ".tab_complete_ui_item",
       (commandElements) =>
-        commandElements.map((e) => e.id ?? "").filter((e) => e != ""),
+        commandElements
+          .filter((e) =>
+            e
+              .querySelector(".p-slash_commands_autocomplete_menu_entity__name")
+              ?.innerHTML.startsWith(`${command}<`),
+          )
+          .map((e) => e.id ?? "")
+          .filter((e) => e != ""),
     );
 
     if (!commandChoices || !commandChoices[0]) {
