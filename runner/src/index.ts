@@ -7,6 +7,7 @@ import readline from "readline/promises";
 import fs from "fs";
 import log from "loglevel";
 import prefixer from "loglevel-plugin-prefix";
+import asyncHandler from "express-async-handler";
 
 prefixer.reg(log);
 prefixer.apply(log);
@@ -102,110 +103,119 @@ app.use((req, res, next) => {
     }
   });
 
-  app.get("/commands", async (req, res) => {
-    const runnerPage = await browser.newPage();
-    await runnerPage.setCookie(...cookies);
+  app.get(
+    "/commands",
+    asyncHandler(async (req, res) => {
+      const runnerPage = await browser.newPage();
+      await runnerPage.setCookie(...cookies);
 
-    await runnerPage.goto(`${SLACK_BASE_URL}/marketplace/${req.query.appId}`, {
-      waitUntil: "networkidle0",
-    });
-    await runnerPage.goto(`${runnerPage.url()}?tab=features`, {
-      waitUntil: "networkidle0",
-    });
+      await runnerPage.goto(
+        `${SLACK_BASE_URL}/marketplace/${req.query.appId}`,
+        {
+          waitUntil: "networkidle0",
+        },
+      );
+      await runnerPage.goto(`${runnerPage.url()}?tab=features`, {
+        waitUntil: "networkidle0",
+      });
 
-    const cmds = await runnerPage.$$eval(
-      ".p-app_directory_detail_features__command",
-      (commandElements) => {
-        let commands: string[] = [];
+      const cmds = await runnerPage.$$eval(
+        ".p-app_directory_detail_features__command",
+        (commandElements) => {
+          let commands: string[] = [];
 
-        for (const commandElement of commandElements) {
-          const command = commandElement.innerHTML.split(" ")[0];
-          if (command === "/") continue;
-          commands.push(command);
-        }
+          for (const commandElement of commandElements) {
+            const command = commandElement.innerHTML.split(" ")[0];
+            if (command === "/") continue;
+            commands.push(command);
+          }
 
-        return commands;
-      },
-    );
+          return commands;
+        },
+      );
 
-    res.json(cmds);
-    await runnerPage.close();
-  });
+      res.json(cmds);
+      await runnerPage.close();
+    }),
+  );
 
   let locked = false;
 
-  app.get("/locked", async (req, res) => {
+  app.get("/locked", (req, res) => {
     res.json(locked);
   });
 
-  app.get("/check", async (req, res, next) => {
-    if (locked) {
-      res.sendStatus(429);
-      return;
-    }
+  app.get(
+    "/check",
+    asyncHandler(async (req, res, next) => {
+      if (locked) {
+        res.sendStatus(429);
+        return;
+      }
 
-    locked = true;
-    const runnerPage = await browser.newPage();
-    await runnerPage.setCookie(...cookies);
-    await runnerPage.goto(
-      `https://app.slack.com/client/${process.env.SLACK_TEAM}/${process.env.SLACK_CHANNEL}`,
-    );
+      locked = true;
+      const runnerPage = await browser.newPage();
+      await runnerPage.setCookie(...cookies);
+      await runnerPage.goto(
+        `https://app.slack.com/client/${process.env.SLACK_TEAM}/${process.env.SLACK_CHANNEL}`,
+      );
 
-    await runnerPage.waitForSelector(".ql-editor", {
-      timeout: 10000,
-    });
+      await runnerPage.waitForSelector(".ql-editor", {
+        timeout: 10000,
+      });
 
-    const command = req.query.command!.toString();
-    await runnerPage.type(`.ql-editor`, command);
-    await runnerPage.keyboard.press("Enter");
+      const command = req.query.command!.toString();
+      await runnerPage.type(`.ql-editor`, command);
+      await runnerPage.keyboard.press("Enter");
 
-    await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
+      await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
 
-    const failed = await runnerPage.$$eval(
-      ".c-message_kit__text",
-      (messages) => {
-        const failRegex = /failed with the error ".+"/;
-        for (const message of messages) {
-          if (failRegex.test(message.innerHTML)) {
-            const authorElement = message.parentElement
-              ?.querySelector("span")
-              ?.querySelector("span")
-              ?.querySelector("button");
-            if (authorElement?.dataset.messageSender === "USLACKBOT") {
-              message.dispatchEvent(new CustomEvent("contextmenu"));
-              const deleteButton = document.querySelector(
-                ".c-menu_item__label",
-              );
-              deleteButton?.dispatchEvent(
-                new MouseEvent("click", {
-                  view: window,
-                  bubbles: true,
-                  cancelable: true,
-                }),
-              );
-              const confirmButton = document.querySelector(
-                ".c-button--focus-visible",
-              );
-              confirmButton?.dispatchEvent(
-                new MouseEvent("click", {
-                  view: window,
-                  bubbles: true,
-                  cancelable: true,
-                }),
-              );
-              return true;
+      const failed = await runnerPage.$$eval(
+        ".c-message_kit__text",
+        (messages) => {
+          const failRegex = /failed with the error ".+"/;
+          for (const message of messages) {
+            if (failRegex.test(message.innerHTML)) {
+              const authorElement = message.parentElement
+                ?.querySelector("span")
+                ?.querySelector("span")
+                ?.querySelector("button");
+              if (authorElement?.dataset.messageSender === "USLACKBOT") {
+                message.dispatchEvent(new CustomEvent("contextmenu"));
+                const deleteButton = document.querySelector(
+                  ".c-menu_item__label",
+                );
+                deleteButton?.dispatchEvent(
+                  new MouseEvent("click", {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true,
+                  }),
+                );
+                const confirmButton = document.querySelector(
+                  ".c-button--focus-visible",
+                );
+                confirmButton?.dispatchEvent(
+                  new MouseEvent("click", {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true,
+                  }),
+                );
+                return true;
+              }
             }
           }
-        }
 
-        return false;
-      },
-    );
+          return false;
+        },
+      );
 
-    res.json(failed);
-    await runnerPage.close();
-    next();
-  });
+      res.json(failed);
+      await runnerPage.close();
+      next();
+    }),
+  );
 
   app.use((req, res, next) => {
     if (req.path == "/check" && locked) {
