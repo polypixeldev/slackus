@@ -104,7 +104,13 @@ export async function checkApp(
               Authorization: process.env.API_SECRET,
             },
           },
-        ).then((r) => r.json());
+        ).then((r) => {
+          if (r.status != 200) {
+            return true;
+          } else {
+            return r.json();
+          }
+        });
       } catch (e) {
         log.error(`Runner command method check errored on app ${app.id}: ${e}`);
         Sentry.captureException(e);
