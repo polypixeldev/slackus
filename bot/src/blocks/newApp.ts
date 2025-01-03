@@ -57,14 +57,6 @@ export default function newApp(dmId: string) {
             {
               text: {
                 type: "plain_text",
-                text: "Slash Command",
-                emoji: true,
-              },
-              value: "Command",
-            },
-            {
-              text: {
-                type: "plain_text",
                 text: "HTTP(S) Request",
                 emoji: true,
               },
@@ -77,6 +69,14 @@ export default function newApp(dmId: string) {
                 emoji: true,
               },
               value: "Heartbeat",
+            },
+            {
+              text: {
+                type: "plain_text",
+                text: "Slash Command (not recommended)",
+                emoji: true,
+              },
+              value: "Command",
             },
           ],
           action_id: "method_select_action",

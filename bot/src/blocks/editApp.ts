@@ -1,9 +1,9 @@
 import type { App, Method } from "@prisma/client";
 
 const methodToText = {
-  Command: "Slash Command",
   HTTP: "HTTP(S) Request",
   Heartbeat: "Heartbeats",
+  Command: "Slash Command (not recommended)",
 };
 
 const intervalToText = {
