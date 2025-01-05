@@ -48,6 +48,10 @@ export async function editApp(slackApp: Slack.App) {
       },
     });
 
+    const retryIntervalStr =
+      view.state.values.retry_select.retry_select_action.selected_option
+        ?.value ?? "none";
+
     const app = await prisma.app.update({
       where: {
         id: view.private_metadata,
@@ -57,6 +61,8 @@ export async function editApp(slackApp: Slack.App) {
           view.state.values.interval_select.interval_select_action
             .selected_option?.value ?? 5,
         ),
+        retryInterval:
+          retryIntervalStr === "none" ? null : Number(retryIntervalStr),
         conversations:
           view.state.values.notify_select.notify_select_action.selected_conversations?.join(
             ",",

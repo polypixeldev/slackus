@@ -1,3 +1,12 @@
+const intervalToText = {
+  5: "5 minutes",
+  10: "10 minutes",
+  15: "15 minutes",
+  30: "30 minutes",
+  60: "1 hour",
+  1440: "1 day",
+};
+
 export default function newApp(dmId: string) {
   return {
     type: "modal" as const,
@@ -97,61 +106,59 @@ export default function newApp(dmId: string) {
             text: "Select an interval",
             emoji: true,
           },
-          options: [
-            {
-              text: {
-                type: "plain_text",
-                text: "5 minutes",
-                emoji: true,
-              },
-              value: "5",
+          options: Object.keys(intervalToText).map((interval) => ({
+            text: {
+              type: "plain_text",
+              text: intervalToText[
+                Number(interval) as keyof typeof intervalToText
+              ],
+              emoji: true,
             },
-            {
-              text: {
-                type: "plain_text",
-                text: "10 minutes",
-                emoji: true,
-              },
-              value: "10",
-            },
-            {
-              text: {
-                type: "plain_text",
-                text: "15 minutes",
-                emoji: true,
-              },
-              value: "15",
-            },
-            {
-              text: {
-                type: "plain_text",
-                text: "30 minutes",
-                emoji: true,
-              },
-              value: "30",
-            },
-            {
-              text: {
-                type: "plain_text",
-                text: "1 hour",
-                emoji: true,
-              },
-              value: "60",
-            },
-            {
-              text: {
-                type: "plain_text",
-                text: "1 day",
-                emoji: true,
-              },
-              value: "1440",
-            },
-          ],
+            value: interval.toString(),
+          })),
           action_id: "interval_select_action",
         },
         label: {
           type: "plain_text",
           text: "Check interval",
+          emoji: true,
+        },
+      },
+      {
+        type: "input",
+        block_id: "retry_select",
+        element: {
+          type: "static_select",
+          placeholder: {
+            type: "plain_text",
+            text: "Select a delay",
+            emoji: true,
+          },
+          options: [
+            {
+              text: {
+                type: "plain_text",
+                text: "Do not retry",
+                emoji: true,
+              },
+              value: "none",
+            },
+            ...Object.keys(intervalToText).map((interval) => ({
+              text: {
+                type: "plain_text",
+                text: intervalToText[
+                  Number(interval) as keyof typeof intervalToText
+                ],
+                emoji: true,
+              },
+              value: interval.toString(),
+            })),
+          ],
+          action_id: "retry_select_action",
+        },
+        label: {
+          type: "plain_text",
+          text: "Retry delay (Slackus will wait this long to retry in case of a false failure)",
           emoji: true,
         },
       },

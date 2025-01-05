@@ -164,6 +164,64 @@ export default function editApp(
       },
       {
         type: "input",
+        block_id: "retry_select",
+        element: {
+          type: "static_select",
+          placeholder: {
+            type: "plain_text",
+            text: "Select a delay",
+            emoji: true,
+          },
+          options: [
+            {
+              text: {
+                type: "plain_text",
+                text: "Do not retry",
+                emoji: true,
+              },
+              value: "none",
+            },
+            ...Object.keys(intervalToText).map((interval) => ({
+              text: {
+                type: "plain_text",
+                text: intervalToText[
+                  Number(interval) as keyof typeof intervalToText
+                ],
+                emoji: true,
+              },
+              value: interval.toString(),
+            })),
+          ],
+          initial_option:
+            app.retryInterval == null
+              ? {
+                  text: {
+                    type: "plain_text",
+                    text: "Do not retry",
+                    emoji: true,
+                  },
+                  value: "none",
+                }
+              : {
+                  text: {
+                    type: "plain_text",
+                    text: intervalToText[
+                      Number(app.retryInterval) as keyof typeof intervalToText
+                    ],
+                    emoji: true,
+                  },
+                  value: app.retryInterval.toString(),
+                },
+          action_id: "retry_select_action",
+        },
+        label: {
+          type: "plain_text",
+          text: "Retry delay (Slackus will wait this long to retry in case of a false failure)",
+          emoji: true,
+        },
+      },
+      {
+        type: "input",
         block_id: "notify_select",
         element: {
           type: "multi_conversations_select",

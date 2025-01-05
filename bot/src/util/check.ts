@@ -49,6 +49,7 @@ export async function runChecks(slackApp: SlackApp) {
 export async function checkApp(
   slackApp: SlackApp,
   app: App & { checks: Check[]; method: Method | null },
+  retry?: boolean,
 ) {
   if (!app.method) {
     log.error(`No method found for app ${app.id}`);
@@ -156,6 +157,15 @@ export async function checkApp(
 
       break;
     }
+  }
+
+  if (failed && retry !== true && app.retryInterval !== null) {
+    setTimeout(
+      () => {
+        checkApp(slackApp, app, true);
+      },
+      app.retryInterval * 60 * 1000,
+    );
   }
 
   await sendNotifications(slackApp, app, failed);

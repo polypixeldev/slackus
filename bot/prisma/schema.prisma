@@ -15,6 +15,7 @@ model App {
   method Method?
 
   interval      Int
+  retryInterval Int?
   conversations String
   checks        Check[]
 
