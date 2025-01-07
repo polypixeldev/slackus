@@ -10,7 +10,7 @@ export async function slackus(app: Slack.App) {
 
     const args = command.text.split(" ").slice(1);
 
-    if (args.length > 1) {
+    if (args.length === 1) {
       const idMatch = args[1].match(/(?<=@)[A-Z\d]+/g) ?? [];
       const id = idMatch[0];
 
