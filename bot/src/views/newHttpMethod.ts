@@ -42,6 +42,9 @@ export async function newHttpMethod(slackApp: Slack.App) {
       const httpMethod =
         view.state.values.method_select.method_select_action.selected_option
           ?.value;
+      const httpStatus =
+        view.state.values.status_select.status_select_action.selected_option
+          ?.value;
 
       if (url) {
         try {
@@ -75,6 +78,16 @@ export async function newHttpMethod(slackApp: Slack.App) {
         return;
       }
 
+      if (!httpStatus) {
+        await ack({
+          response_action: "errors",
+          errors: {
+            method_input: "Invalid status",
+          },
+        });
+        return;
+      }
+
       await ack({
         response_action: "clear",
       });
@@ -83,6 +96,7 @@ export async function newHttpMethod(slackApp: Slack.App) {
         data: {
           url,
           httpMethod,
+          httpStatus,
           methodId: app.method!.id,
         },
       });

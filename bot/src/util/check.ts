@@ -138,11 +138,28 @@ export async function checkApp(
           method: httpMethod.httpMethod,
         });
 
-        // 2xx status codes == success
-        if (res.status >= 200 && res.status < 300) {
-          failed = false;
-        } else {
-          failed = true;
+        switch (httpMethod.httpStatus) {
+          case "2xx": {
+            if (res.status >= 200 && res.status < 300) {
+              failed = false;
+            } else {
+              failed = true;
+            }
+
+            break;
+          }
+          case "< 400": {
+            if (res.status < 400) {
+              failed = false;
+            } else {
+              failed = true;
+            }
+
+            break;
+          }
+          default: {
+            failed = true;
+          }
         }
       } catch (e) {
         failed = true;

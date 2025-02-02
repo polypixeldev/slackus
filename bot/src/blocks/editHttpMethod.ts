@@ -1,5 +1,10 @@
 import type { HttpMethod } from "@prisma/client";
 
+const statusToLabel = {
+  "2xx": "Only 2xx",
+  "< 400": "Anything < 400",
+};
+
 export default function editHttpMethod(appId: string, method?: HttpMethod) {
   return {
     type: "modal" as const,
@@ -80,6 +85,52 @@ export default function editHttpMethod(appId: string, method?: HttpMethod) {
         label: {
           type: "plain_text",
           text: "HTTP method",
+          emoji: true,
+        },
+      },
+      {
+        type: "input",
+        block_id: "status_select",
+        element: {
+          type: "static_select",
+          placeholder: {
+            type: "plain_text",
+            text: "HTTP status codes",
+            emoji: true,
+          },
+          options: [
+            {
+              text: {
+                type: "plain_text",
+                text: statusToLabel["2xx"],
+                emoji: true,
+              },
+              value: "2xx",
+            },
+            {
+              text: {
+                type: "plain_text",
+                text: statusToLabel["< 400"],
+                emoji: true,
+              },
+              value: "< 400",
+            },
+          ],
+          initial_option: {
+            text: {
+              type: "plain_text",
+              text: statusToLabel[
+                method!.httpStatus as keyof typeof statusToLabel
+              ],
+              emoji: true,
+            },
+            value: method!.httpStatus,
+          },
+          action_id: "status_select_action",
+        },
+        label: {
+          type: "plain_text",
+          text: "What status codes should be considered as UP?",
           emoji: true,
         },
       },

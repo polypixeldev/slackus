@@ -70,6 +70,42 @@ export default function newHttpMethod(appId: string) {
           emoji: true,
         },
       },
+      {
+        type: "input",
+        block_id: "status_select",
+        element: {
+          type: "static_select",
+          placeholder: {
+            type: "plain_text",
+            text: "HTTP status codes",
+            emoji: true,
+          },
+          options: [
+            {
+              text: {
+                type: "plain_text",
+                text: "Only 2xx",
+                emoji: true,
+              },
+              value: "2xx",
+            },
+            {
+              text: {
+                type: "plain_text",
+                text: "Anything < 400",
+                emoji: true,
+              },
+              value: "< 400",
+            },
+          ],
+          action_id: "status_select_action",
+        },
+        label: {
+          type: "plain_text",
+          text: "What status codes should be considered as UP?",
+          emoji: true,
+        },
+      },
     ],
   };
 }

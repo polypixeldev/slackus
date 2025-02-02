@@ -45,6 +45,7 @@ model HttpMethod {
   id         String @id @default(cuid())
   url        String
   httpMethod String
+  httpStatus  String @default("2xx")
 
   methodId String @unique
   method   Method @relation(fields: [methodId], references: [id], onDelete: Cascade)
