@@ -97,6 +97,14 @@ export default function newHttpMethod(appId: string) {
               },
               value: "< 400",
             },
+            {
+              text: {
+                type: "plain_text",
+                text: statusToLabel["404"],
+                emoji: true,
+              },
+              value: "404",
+            },
           ],
           action_id: "status_select_action",
         },
