@@ -157,6 +157,15 @@ export async function checkApp(
 
             break;
           }
+          case "404": {
+            if (res.status == 404) {
+              failed = false;
+            } else {
+              failed = true;
+            }
+
+            break;
+          }
           default: {
             failed = true;
           }

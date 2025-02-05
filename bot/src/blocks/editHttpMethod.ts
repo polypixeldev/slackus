@@ -3,6 +3,7 @@ import type { HttpMethod } from "@prisma/client";
 const statusToLabel = {
   "2xx": "Only 2xx",
   "< 400": "Anything < 400",
+  "404": "Only 404",
 };
 
 export default function editHttpMethod(appId: string, method?: HttpMethod) {
@@ -114,6 +115,14 @@ export default function editHttpMethod(appId: string, method?: HttpMethod) {
                 emoji: true,
               },
               value: "< 400",
+            },
+            {
+              text: {
+                type: "plain_text",
+                text: statusToLabel["404"],
+                emoji: true,
+              },
+              value: "404",
             },
           ],
           initial_option: {
