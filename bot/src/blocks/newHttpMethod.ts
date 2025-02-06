@@ -100,7 +100,7 @@ export default function newHttpMethod(appId: string) {
             {
               text: {
                 type: "plain_text",
-                text: statusToLabel["404"],
+                text: "Only 404",
                 emoji: true,
               },
               value: "404",
