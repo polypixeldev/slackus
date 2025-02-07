@@ -13,7 +13,7 @@ export async function runChecks(slackApp: SlackApp) {
     include: {
       checks: {
         orderBy: {
-          timestamp: "desc",
+          timestamp: "asc",
         },
       },
       method: true,
