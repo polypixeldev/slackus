@@ -13,20 +13,20 @@ export async function editApp(slackApp: Slack.App) {
     const conversations = view.state.values.notify_select.notify_select_action
       .selected_conversations ?? [body.user.id];
 
-    const privateConversations = [];
+    const conversationPromises = [];
     for (const conversation of conversations) {
-      try {
-        const info = await client.conversations.info({
+      conversationPromises.push(
+        client.conversations.info({
           channel: conversation,
-        });
-
-        if (!info.ok) {
-          privateConversations.push(conversation);
-        }
-      } catch {
-        privateConversations.push(conversation);
-      }
+        }),
+      );
     }
+
+    const conversationResponses =
+      await Promise.allSettled(conversationPromises);
+    const privateConversations = conversationResponses.filter(
+      (response) => response.status === "rejected" || !response.value.ok,
+    );
 
     if (privateConversations.length > 0) {
       await ack({
