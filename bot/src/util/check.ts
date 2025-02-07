@@ -11,7 +11,11 @@ import type { App, Check, Method } from "@prisma/client";
 export async function runChecks(slackApp: SlackApp) {
   const apps = await prisma.app.findMany({
     include: {
-      checks: true,
+      checks: {
+        orderBy: {
+          timestamp: "desc",
+        },
+      },
       method: true,
     },
   });
